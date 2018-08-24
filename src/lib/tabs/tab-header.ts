@@ -19,6 +19,7 @@ import {
   ContentChildren,
   ElementRef,
   EventEmitter,
+  Inject,
   Input,
   OnDestroy,
   Optional,
@@ -28,6 +29,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import {CanDisableRipple, mixinDisableRipple} from '@angular/material/core';
+import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
 import {merge, of as observableOf, Subject} from 'rxjs';
 import {takeUntil} from 'rxjs/operators';
 import {MatInkBar} from './ink-bar';
@@ -72,6 +74,7 @@ export const _MatTabHeaderMixinBase = mixinDisableRipple(MatTabHeaderBase);
     'class': 'mat-tab-header',
     '[class.mat-tab-header-pagination-controls-enabled]': '_showPaginationControls',
     '[class.mat-tab-header-rtl]': "_getLayoutDirection() == 'rtl'",
+    '[class._mat-animation-noopable]': '_animationMode === "NoopAnimations"',
   },
 })
 export class MatTabHeader extends _MatTabHeaderMixinBase
@@ -136,7 +139,8 @@ export class MatTabHeader extends _MatTabHeaderMixinBase
   constructor(private _elementRef: ElementRef,
               private _changeDetectorRef: ChangeDetectorRef,
               private _viewportRuler: ViewportRuler,
-              @Optional() private _dir: Directionality) {
+              @Optional() private _dir: Directionality,
+              @Optional() @Inject(ANIMATION_MODULE_TYPE) public _animationMode?: string) {
     super();
   }
 
