@@ -24,8 +24,8 @@ export class Rule extends Rules.TypedRule {
 export class CheckImportMiscWalker extends ProgramAwareRuleWalker {
   visitImportDeclaration(declaration: ts.ImportDeclaration) {
     if (isMaterialImportDeclaration(declaration)) {
-      declaration.importClause.namedBindings.forEachChild(n => {
-        let importName = n.getFirstToken() && n.getFirstToken().getText();
+      declaration.importClause!.namedBindings!.forEachChild(n => {
+        let importName = n.getFirstToken() && n.getFirstToken()!.getText();
         if (importName === 'SHOW_ANIMATION' || importName === 'HIDE_ANIMATION') {
           this.addFailureAtNode(
               n,
