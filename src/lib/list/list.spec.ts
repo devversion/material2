@@ -9,7 +9,7 @@ describe('MatList', () => {
   // Default ripple durations used for testing.
   const {enterDuration, exitDuration} = defaultRippleAnimationConfig;
 
-  beforeEach(async(() => {
+  beforeEach(async(() => {d
     TestBed.configureTestingModule({
       imports: [MatListModule],
       declarations: [
