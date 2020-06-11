@@ -1,0 +1,19 @@
+load("//macos-test:index.bzl", "custom_rule")
+
+sh_test(
+    name = "testd",
+    srcs = ["test.sh"],
+    data = [":my-depd", ":other-file"],
+    tags = ["remote"]
+)
+
+custom_rule(
+    name = "my-depd",
+    tags = ["remote"]   
+)
+
+genrule(
+    name = "other-file",
+    outs = ["other-file.txt"],
+    cmd = """sleep 5; echo "Hello" > $@"""
+)
