@@ -17,6 +17,7 @@ ng_module(
     module_name = "@angular/cdk/table",
     deps = [
         "//src/cdk/bidi",
+        "//src/cdk/scrolling",
         "//src/cdk/coercion",
         "//src/cdk/collections",
         "//src/cdk/platform",

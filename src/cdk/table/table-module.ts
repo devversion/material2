@@ -7,6 +7,7 @@
  */
 
 import {NgModule} from '@angular/core';
+import {ScrollingModule} from '../scrolling';
 import {HeaderRowOutlet, DataRowOutlet, CdkTable, FooterRowOutlet, NoDataRowOutlet} from './table';
 import {
   CdkCellOutlet, CdkFooterRow, CdkFooterRowDef, CdkHeaderRow, CdkHeaderRowDef, CdkRow,
@@ -45,7 +46,7 @@ const EXPORTED_DECLARATIONS = [
 
 @NgModule({
   exports: EXPORTED_DECLARATIONS,
-  declarations: EXPORTED_DECLARATIONS
-
+  declarations: EXPORTED_DECLARATIONS,
+  imports: [ScrollingModule]
 })
 export class CdkTableModule { }
