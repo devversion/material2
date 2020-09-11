@@ -9,6 +9,7 @@
 import {BidiModule, Directionality} from '@angular/cdk/bidi';
 import {Platform} from '@angular/cdk/platform';
 import {
+  dispatchFakeEvent,
   dispatchMouseEvent,
   dispatchPointerEvent,
   dispatchTouchEvent,
@@ -19,7 +20,6 @@ import {
   fakeAsync,
   flush,
   TestBed,
-  tick,
   waitForAsync,
 } from '@angular/core/testing';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -289,8 +289,14 @@ describe('MDC-based MatSlider' , () => {
     }));
 
     function isRippleVisible(selector: string) {
-      tick(500);
-      return !!document.querySelector(`.mat-mdc-slider-${selector}-ripple`);
+      flushRippleTransitions();
+      return thumbElement.querySelector(`.mat-mdc-slider-${selector}-ripple`) !== null;
+    }
+
+    function flushRippleTransitions() {
+      thumbElement.querySelectorAll('.mat-ripple-element').forEach(el => {
+        dispatchFakeEvent(el, 'transitionend');
+      });
     }
 
     function blur() {
