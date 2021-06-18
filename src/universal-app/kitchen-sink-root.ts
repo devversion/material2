@@ -7,10 +7,26 @@ import {KitchenSinkModule} from './kitchen-sink/kitchen-sink';
 @Component({
   selector: 'kitchen-sink-root',
   template: `
-    <h1>Kitchen sink app</h1>
-    <kitchen-sink></kitchen-sink>
-    <kitchen-sink-mdc></kitchen-sink-mdc>
+    <div class="apps">
+      <kitchen-sink class="kitchen-sink"></kitchen-sink>
+      <kitchen-sink-mdc class="kitchen-sink"></kitchen-sink-mdc>
+    </div>
   `,
+  styles: [`
+    .apps {
+      display: flex;
+      flex-direction: row;
+    }
+    
+    .kitchen-sink {
+      flex: 1;
+      padding: 16px;
+    }
+    
+    .kitchen-sink:first-child {
+      border-right: 2px solid grey;
+    }
+  `]
 })
 export class KitchenSinkRoot {
 }
