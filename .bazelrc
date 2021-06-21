@@ -85,9 +85,9 @@ build:remote --auth_enabled=true
 # is provided by the shared dev-infra package and targets k8 remote containers.
 build:remote --crosstool_top=@npm//@angular/dev-infra-private/bazel/remote-execution/cpp:cc_toolchain_suite
 build:remote --extra_toolchains=@npm//@angular/dev-infra-private/bazel/remote-execution/cpp:cc_toolchain
-build:remote --extra_execution_platforms=@npm//@angular/dev-infra-private/bazel/remote-execution:platform
-build:remote --host_platform=@npm//@angular/dev-infra-private/bazel/remote-execution:platform
-build:remote --platforms=@npm//@angular/dev-infra-private/bazel/remote-execution:platform
+build:remote --extra_execution_platforms=//tools:rbe_platform_with_increased_shared_memory
+build:remote --host_platform=//tools:rbe_platform_with_increased_shared_memory
+build:remote --platforms=//tools:rbe_platform_with_increased_shared_memory
 
 ################################
 # --config=build-results       #

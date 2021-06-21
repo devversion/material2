@@ -37,3 +37,12 @@ genrule(
     outs = ["angular_ivy_enabled.js"],
     cmd = "echo exports.ivyEnabled = \"'True' === '$(angular_ivy_enabled)'\"\\; > $@",
 )
+
+platform(
+    name = "rbe_platform_with_increased_shared_memory",
+    exec_properties = {
+        "dockerShmSize": "2g",
+    },
+    parents = ["@npm//@angular/dev-infra-private/bazel/remote-execution:platform"],
+)
+
