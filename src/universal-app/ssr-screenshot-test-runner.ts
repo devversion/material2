@@ -118,7 +118,7 @@ async function renderKitchenSinkOnServer(): Promise<string> {
 /**
  * Updates the browser viewport to match the `body` content so that  everything
  * becomes visible without any scrollbars. This is useful for screenshots as it
- * allows Selenium to take full-page screenshots.
+ * allows Puppeteer to take full-page screenshots.
  */
 async function updateBrowserViewportToMatchContent(page: Page) {
   const bodyScrollHeight = await page.evaluate(() => document.body.scrollHeight);
