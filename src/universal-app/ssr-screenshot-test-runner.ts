@@ -128,6 +128,6 @@ async function updateBrowserViewportToMatchContent(page: Page) {
   console.error('intended', bodyScrollHeight)
   await page.setViewport({
     width: screenshotBrowserWidth,
-    height: 7083,
+    height: bodyScrollHeight,
   });
 }

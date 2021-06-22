@@ -11,14 +11,20 @@
   <base href="/">
 
   <style>
-    /*
-      Make sure bottom sheet doesn't obscure components. Also specify a `font-family`
-      so that the page looks similar on different platforms with different default fonts.
-     */
+    /* Make sure bottom sheet doesn't obscure components. */
     body {
       padding-bottom: 80px;
-      font-family: Roboto;
+    }
+
+    /**
+      Set a `font-family` so that the page looks similar on different platforms with
+      different default fonts.
+     */
+    body, h1, h2, h3, h4, h5, h6 {
+      margin: 10px 0;
       text-rendering: geometricPrecision;
+      font-size: 14px;
+      font-family: Roboto;
       -webkit-font-smoothing: none;
     }
 
