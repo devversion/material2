@@ -69,7 +69,6 @@ async function main(goldenPath: string, approveGolden: boolean) {
   const browser = await launch({
     executablePath: runfiles.resolve(chromiumExecutableRootPath!),
     headless: true,
-    args: ['--font-render-hinting=none']
   });
 
   const page = await browser.newPage();
@@ -78,8 +77,8 @@ async function main(goldenPath: string, approveGolden: boolean) {
   const currentScreenshotBuffer = await page.screenshot({encoding: 'binary'}) as Buffer;
   await browser.close();
 
-  if (true) {
-    writeFileSync(screenshotDiffPath, currentScreenshotBuffer);
+  if (approveGolden) {
+    writeFileSync(goldenPath, currentScreenshotBuffer);
     console.info('Golden screenshot updated.');
     return;
   }
@@ -127,9 +126,8 @@ async function updateBrowserViewportToMatchContent(page: Page) {
   // We use a hard-coded large width for the window, so that the screenshot does not become
   // too large vertically. This also helps with potential webdriver screenshot issues where
   // screenshots render incorrectly if the window height has been increased too much.
-  console.error('intended', bodyScrollHeight)
   await page.setViewport({
     width: screenshotBrowserWidth,
-    height: 5539,
+    height: bodyScrollHeight,
   });
 }
