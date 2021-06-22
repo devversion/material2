@@ -9,10 +9,10 @@
  */
 
 import {runfiles} from '@bazel/runfiles';
-import * as webdriver from 'selenium-webdriver';
 import {readFileSync, writeFileSync} from 'fs';
 import {decode, encode, PNGDataArray} from 'fast-png';
 import {join} from 'path';
+import {launch, Page} from 'puppeteer-core';
 
 const pixelmatch = require('pixelmatch');
 
@@ -23,7 +23,12 @@ const pixelmatch = require('pixelmatch');
  * https://github.com/bazelbuild/rules_webtesting/blob/06023bb3/web/internal/metadata.bzl#L69-L82
  */
 interface WebTestMetadata {
-  capabilities: any;
+  /**
+   * List of web test files for the current browser. We limit our type to Chromium which
+   * will be extracted at build time. More details on the properties:
+   * https://github.com/bazelbuild/rules_webtesting/blob/34c659ab3e78f41ebe6453bee6201a69aef90f56/go/metadata/web_test_files.go#L29.
+   */
+  webTestFiles: {namedFiles: {CHROMIUM?: string}}[];
 }
 
 if (process.env['WEB_TEST_METADATA'] === undefined) {
@@ -34,6 +39,9 @@ if (process.env['WEB_TEST_METADATA'] === undefined) {
 /** Web test metadata that has been registered as part of the Bazel `web_test`. */
 const webTestMetadata: WebTestMetadata =
   require(runfiles.resolve(process.env['WEB_TEST_METADATA']));
+
+/** Path to Chromium extracted from the Bazel `web_test` metadata. */
+const chromiumExecutableRootPath = webTestMetadata.webTestFiles?.[0].namedFiles.CHROMIUM;
 
 /** Path to a directory where undeclared test artifacts can be stored. e.g. a diff file. */
 const testOutputDirectory = process.env.TEST_UNDECLARED_OUTPUTS_DIR!;
@@ -58,23 +66,25 @@ if (require.main === module) {
 /** Entry point for the screenshot test runner. */
 async function main(goldenPath: string, approveGolden: boolean) {
   const outputPath = await renderKitchenSinkOnServer();
-  const driver = await new webdriver.Builder()
-    .usingServer(process.env.WEB_TEST_WEBDRIVER_SERVER!)
-    .withCapabilities(webTestMetadata.capabilities)
-    .build();
+  const browser = await launch({
+    executablePath: runfiles.resolve(chromiumExecutableRootPath!),
+    headless: false,
+  });
+  const page = await browser.newPage();
 
-  await driver.get(`file://${outputPath}`);
-  await updateBrowserViewportToMatchContent(driver);
-  const currentScreenshotBase64 = await driver.takeScreenshot();
-  await driver.close();
+
+  await page.goto(`file://${outputPath}`);
+  await updateBrowserViewportToMatchContent(page);
+  const currentScreenshotBuffer = await page.screenshot({encoding: 'binary'}) as Buffer;
+  await browser.close();
 
   if (approveGolden) {
-    writeFileSync(goldenPath, currentScreenshotBase64, 'base64');
+    writeFileSync(goldenPath, currentScreenshotBuffer);
     console.info('Golden screenshot updated.');
     return;
   }
 
-  const currentScreenshot = decode(Buffer.from(currentScreenshotBase64, 'base64'));
+  const currentScreenshot = decode(currentScreenshotBuffer);
   const goldenScreenshot = decode(readFileSync(goldenPath));
   const diffImageData: PNGDataArray = new Uint8Array({length: currentScreenshot.data.length});
   const numDiffPixels = pixelmatch(goldenScreenshot.data, currentScreenshot.data, diffImageData,
@@ -110,14 +120,13 @@ async function renderKitchenSinkOnServer(): Promise<string> {
  * becomes visible without any scrollbars. This is useful for screenshots as it
  * allows Selenium to take full-page screenshots.
  */
-async function updateBrowserViewportToMatchContent(driver: webdriver.WebDriver) {
-  const windowFrameHeight = await driver.executeScript<number>(
-    'return window.outerHeight - window.innerHeight');
-  const bodyScrollHeight = await driver.executeScript<number>(
-    'return document.body.scrollHeight');
+async function updateBrowserViewportToMatchContent(page: Page) {
+  const bodyScrollHeight = await page.evaluate(() => document.body.scrollHeight);
   // We use a hard-coded large width for the window, so that the screenshot does not become
   // too large vertically. This also helps with potential webdriver screenshot issues where
   // screenshots render incorrectly if the window height has been increased too much.
-  await driver.manage().window().setSize(
-    screenshotBrowserWidth, bodyScrollHeight + windowFrameHeight);
+  await page.setViewport({
+    width: screenshotBrowserWidth,
+    height: bodyScrollHeight,
+  });
 }
