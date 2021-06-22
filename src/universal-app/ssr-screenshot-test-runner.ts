@@ -68,7 +68,7 @@ async function main(goldenPath: string, approveGolden: boolean) {
   const outputPath = await renderKitchenSinkOnServer();
   const browser = await launch({
     executablePath: runfiles.resolve(chromiumExecutableRootPath!),
-    headless: false,
+    headless: true,
   });
   const page = await browser.newPage();
 
