@@ -78,8 +78,8 @@ async function main(goldenPath: string, approveGolden: boolean) {
   const currentScreenshotBuffer = await page.screenshot({encoding: 'binary'}) as Buffer;
   await browser.close();
 
-  if (approveGolden) {
-    writeFileSync(goldenPath, currentScreenshotBuffer);
+  if (true) {
+    writeFileSync(screenshotDiffPath, currentScreenshotBuffer);
     console.info('Golden screenshot updated.');
     return;
   }
@@ -89,6 +89,8 @@ async function main(goldenPath: string, approveGolden: boolean) {
   const diffImageData: PNGDataArray = new Uint8Array({length: currentScreenshot.data.length});
   const numDiffPixels = pixelmatch(goldenScreenshot.data, currentScreenshot.data, diffImageData,
       currentScreenshot.width, currentScreenshot.height);
+
+      console.error('diff perc', numDiffPixels / (currentScreenshot.width * currentScreenshot.height));
 
   if (numDiffPixels !== 0) {
     writeFileSync(screenshotDiffPath, encode({
@@ -128,6 +130,6 @@ async function updateBrowserViewportToMatchContent(page: Page) {
   console.error('intended', bodyScrollHeight)
   await page.setViewport({
     width: screenshotBrowserWidth,
-    height: bodyScrollHeight,
+    height: 5539,
   });
 }
