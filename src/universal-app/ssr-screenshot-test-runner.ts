@@ -70,9 +70,8 @@ async function main(goldenPath: string, approveGolden: boolean) {
     executablePath: runfiles.resolve(chromiumExecutableRootPath!),
     headless: true,
   });
+
   const page = await browser.newPage();
-
-
   await page.goto(`file://${outputPath}`);
   await updateBrowserViewportToMatchContent(page);
   const currentScreenshotBuffer = await page.screenshot({encoding: 'binary'}) as Buffer;
