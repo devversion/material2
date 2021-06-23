@@ -7,32 +7,23 @@ on:
 jobs:
   ssr_golden_approval:
     runs-on: ubuntu-latest
+    # Run only if the `/approve-ssr-golden` command is specified in the comment.
+    # Skip this job if the comment author is not the author of the pull request.
+    if: |
+      contains(github.event.comment.body, '/approve-ssr-golden') &&
+      (github.event.comment.author_association === "COLLABORATOR" ||
+       github.event.comment.author_association === "MEMBER" ||
+       github.event.comment.author_association === "OWNER" ||
+       github.event.comment.user.login === github.event.issue.user.login
+      )
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump job context
-        env:
-          JOB_CONTEXT: ${{ toJSON(job) }}
-        run: echo "$JOB_CONTEXT"
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJSON(steps) }}
-        run: echo "$STEPS_CONTEXT"
-      - name: Dump runner context
-        env:
-          RUNNER_CONTEXT: ${{ toJSON(runner) }}
-        run: echo "$RUNNER_CONTEXT"
-      - name: Dump strategy context
-        env:
-          STRATEGY_CONTEXT: ${{ toJSON(strategy) }}
-        run: echo "$STRATEGY_CONTEXT"
-      - name: Dump matrix context
-        env:
-          MATRIX_CONTEXT: ${{ toJSON(matrix) }}
-        run: echo "$MATRIX_CONTEXT"
       - uses: actions/checkout@v2
+      - uses: actions/github-script@v4
+        id: pr-data
+        with:
+          script: |
+            return (await octokit.rest.pulls.get(
+              {...github.repo, pull_number: ${{github.event.issue.number}}})).data;
       - run: yarn install --frozen-lockfile --non-interactive
       - run: bazel run //src/universal-app:screenshot_test.accept
       - name: Push back to pull request
@@ -40,4 +31,4 @@ jobs:
           git config --global user.name 'ng-github-robot'
           git config --global user.email 'noreply@angular.io'
           git commit -am "test: update kitchen-sink prerender screenshot golden"
-          git push
+          git push ${{steps.pr-data.head.repo.clone_url}} HEAD:${{steps.pr-data.head.repo.clone_url}}
