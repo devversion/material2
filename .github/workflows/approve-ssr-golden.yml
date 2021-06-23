@@ -15,7 +15,7 @@ jobs:
       (github.event.comment.author_association == 'COLLABORATOR' ||
        github.event.comment.author_association == 'MEMBER' ||
        github.event.comment.author_association == 'OWNER' ||
-       github.event.comment.user.login === github.event.issue.user.login
+       github.event.comment.user.login == github.event.issue.user.login
       )
     steps:
       - uses: actions/checkout@v2
