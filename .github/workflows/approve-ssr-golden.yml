@@ -19,12 +19,14 @@ jobs:
       )
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/github-script@v4
-        id: pr-data
+      - name: Retrieving pull request head refspec
+        uses: actions/github-script@v4
+        id: pr-refspec
         with:
           script: |
-            return (await github.pulls.get(
-              {...context.repo, pull_number: ${{github.event.issue.number}}})).data;
+            const {data} = await github.pulls.get(
+              {...context.repo, pull_number: ${{github.event.issue.number}}}));
+            return `${data.head.repo.clone_url} HEAD:${data.head.ref}`;
       - run: yarn install --frozen-lockfile --non-interactive
       - run: bazel run //src/universal-app:screenshot_test.accept
       - name: Push back to pull request
@@ -32,5 +34,4 @@ jobs:
           git config --global user.name 'ng-github-robot'
           git config --global user.email 'noreply@angular.io'
           git commit -am "test: update kitchen-sink prerender screenshot golden"
-          git push ${{steps.pr-data.outputs.result.head.repo.clone_url}} \
-              HEAD:${{steps.pr-data.outputs.result.head.repo.clone_url}}
+          git push ${{steps.pr-refspec.outputs.result}}
