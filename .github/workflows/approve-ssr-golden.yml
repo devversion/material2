@@ -28,7 +28,7 @@ jobs:
             const {data} = await github.pulls.get(
               {...context.repo, pull_number: ${{github.event.issue.number}}});
             const repoGitUrl = `github.com/${data.head.repo.full_name}.git`;
-            return `http://${{secrets.GITHUB_TOKEN}}@${repoGitUrl} HEAD:${data.head.ref}`;
+            return `http://ng-robot:${{secrets.GITHUB_TOKEN}}@${repoGitUrl} HEAD:${data.head.ref}`;
       - run: yarn install --frozen-lockfile --non-interactive
       - run: bazel run //src/universal-app:screenshot_test.accept
       - name: Push back to pull request
