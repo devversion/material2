@@ -23,6 +23,7 @@ jobs:
         uses: actions/github-script@v4
         id: pr-refspec
         with:
+          result-encoding: string
           script: |
             const {data} = await github.pulls.get(
               {...context.repo, pull_number: ${{github.event.issue.number}}});
