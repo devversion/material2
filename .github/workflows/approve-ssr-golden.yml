@@ -26,7 +26,7 @@ jobs:
           script: |
             const {data} = await github.pulls.get(
               {...context.repo, pull_number: ${{github.event.issue.number}}});
-            return `${data.head.repo.clone_url} HEAD:${data.head.ref}`;
+            return `${data.head.repo.ssh_url} HEAD:${data.head.ref}`;
       - run: yarn install --frozen-lockfile --non-interactive
       - run: bazel run //src/universal-app:screenshot_test.accept
       - name: Push back to pull request
