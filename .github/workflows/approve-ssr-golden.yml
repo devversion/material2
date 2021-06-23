@@ -31,7 +31,7 @@ jobs:
       - run: bazel run //src/universal-app:screenshot_test.accept
       - name: Push back to pull request
         env:
-          TARGET_REFSPEC: steps.pr-refspec.outputs.result
+          TARGET_REFSPEC: ${{steps.pr-refspec.outputs.result}}
         run: |
           git config --global user.name 'ng-github-robot'
           git config --global user.email 'noreply@angular.io'
