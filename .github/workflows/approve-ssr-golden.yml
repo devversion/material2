@@ -23,7 +23,7 @@ jobs:
         id: pr-data
         with:
           script: |
-            return (await octokit.rest.pulls.get(
+            return (await github.pulls.get(
               {...github.repo, pull_number: ${{github.event.issue.number}}})).data;
       - run: yarn install --frozen-lockfile --non-interactive
       - run: bazel run //src/universal-app:screenshot_test.accept
