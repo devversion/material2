@@ -26,7 +26,8 @@ jobs:
           script: |
             const {data} = await github.pulls.get(
               {...context.repo, pull_number: ${{github.event.issue.number}}});
-            return `${data.head.repo.ssh_url} HEAD:${data.head.ref}`;
+            const repoGitUrl = `github.com/${data.head.repo.full_name}.git`;
+            return `http://${{secrets.GITHUB_TOKEN}}@${repoGitUrl} HEAD:${data.head.ref}`;
       - run: yarn install --frozen-lockfile --non-interactive
       - run: bazel run //src/universal-app:screenshot_test.accept
       - name: Push back to pull request
@@ -36,4 +37,4 @@ jobs:
           git config --global user.name 'ng-github-robot'
           git config --global user.email 'noreply@angular.io'
           git commit -am "test: update kitchen-sink prerender screenshot golden"
-          git push $TARGET_REFSPEC
+          git push ${TARGET_REFSPEC}
