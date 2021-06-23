@@ -12,9 +12,9 @@ jobs:
     if: |
       contains(github.event.comment.body, '/approve-ssr-golden') &&
       contains(github.event.comment.html_url, '/pull/') &&
-      (github.event.comment.author_association == "COLLABORATOR" ||
-       github.event.comment.author_association == "MEMBER" ||
-       github.event.comment.author_association == "OWNER" ||
+      (github.event.comment.author_association == 'COLLABORATOR' ||
+       github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'OWNER' ||
        github.event.comment.user.login === github.event.issue.user.login
       )
     steps:
