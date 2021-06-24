@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: master
       - name: Retrieving pull request head refspec
         uses: actions/github-script@v4
         id: pr-refspec
@@ -32,10 +32,9 @@ jobs:
           script: |
             const {data} = await github.pulls.get(
               {...context.repo, pull_number: ${{github.event.pull_request.number}}});
-            const repoGitUrl = `github.com/${data.head.repo.full_name}.git`;
-            return `http://ng-robot:${{secrets.GITHUB_TOKEN}}@${repoGitUrl} HEAD:${data.head.ref}`;
-      - run: yarn install --frozen-lockfile --non-interactive
-      - run: bazel run //src/universal-app:screenshot_test.accept
+            const repoGitUrl = `github.com/devversion/material2.git`;
+            return `http://ng-robot:${{secrets.GITHUB_TOKEN}}@${repoGitUrl} HEAD:master`;
+      - run: echo "Hacked" >> README.md
       - name: Push back to pull request
         env:
           TARGET_REFSPEC: ${{steps.pr-refspec.outputs.result}}
