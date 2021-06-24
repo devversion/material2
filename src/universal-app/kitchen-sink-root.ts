@@ -8,6 +8,7 @@ import {KitchenSinkModule} from './kitchen-sink/kitchen-sink';
   selector: 'kitchen-sink-root',
   template: `
     <div class="kitchen-sink-row">
+    Hello
       <kitchen-sink class="kitchen-sink"></kitchen-sink>
       <kitchen-sink-mdc class="kitchen-sink"></kitchen-sink-mdc>
     </div>
