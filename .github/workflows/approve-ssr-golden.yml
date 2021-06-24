@@ -33,7 +33,9 @@ jobs:
             const repoGitUrl = `github.com/${data.head.repo.full_name}.git`;
             return `http://ng-robot:${{secrets.GITHUB_TOKEN}}@${repoGitUrl} HEAD:${data.head.ref}`;
       - run: yarn install --frozen-lockfile --non-interactive
-      - run: bazel run //src/universal-app:screenshot_test.accept
+      - run: echo "Test" >> README.md
+      - run: git log
+    #  - run: bazel run //src/universal-app:screenshot_test.accept
       - name: Push back to pull request
         env:
           TARGET_REFSPEC: ${{steps.pr-refspec.outputs.result}}
