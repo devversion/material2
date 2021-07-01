@@ -1,0 +1,14 @@
+name: Push SSR screenshot golden to pull request
+
+on:
+  workflow_run:
+    workflows: [Build SSR screenshot golden]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  ssr-golden-push:
+    runs-on: ubuntu-latest
+    steps:

@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  ssr_golden_approval:
+  ssr-golden-build:
     runs-on: ubuntu-latest
     # Run only if the `/approve-ssr-golden` command is specified in the review.
     # Skip this job if the comment author is not the author of the pull request.
@@ -44,3 +44,8 @@ jobs:
           git config --global user.email 'noreply@angular.io'
           git commit -am "test: update kitchen-sink prerender screenshot golden"
           git push ${TARGET_REFSPEC}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: screenshot
+          path:

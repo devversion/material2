@@ -1,0 +1,30 @@
+name: Approve SSR screenshot golden
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  ssr-golden-build:
+    runs-on: ubuntu-latest
+    # Run only if the `/approve-ssr-golden` command is specified in the review.
+    # Skip this job if the comment author is not the author of the pull request.
+    if: |
+      contains(github.event.review.body, '/approve-ssr-golden') &&
+      (github.event.review.author_association == 'COLLABORATOR' ||
+       github.event.review.author_association == 'MEMBER' ||
+       github.event.review.author_association == 'OWNER' ||
+       github.event.review.user.login == github.event.pull_request.user.login
+      )
+    steps:
+      - uses: actions/checkout@v2
+      - run: yarn install --frozen-lockfile --non-interactive
+      - run: bazel run //src/universal-app:screenshot_test.accept
+      - uses: actions/upload-artifact@v2
+        with:
+          name: screenshot
+          path: goldens/kitchen-sink-prerendered.png
