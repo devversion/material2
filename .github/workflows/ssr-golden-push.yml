@@ -16,6 +16,8 @@ jobs:
       # Checkout the default branch (i.e. `master`), and install the Yarn dependencies.
       - uses: actions/checkout@v2
       - run: yarn install --frozen-lockfile --non-interactive
+      - run: git config --global user.email "robot@angular.io"
+      - run: git config --global user.name "angular-robot"
       # Run the script that is responsible for fetching the built screenshot golden and
       # pushing it back as a separate commit to the original pull request.
       - run: yarn ts-node --project scripts/tsconfig.json scripts/github-actions/ssr-golden-push.ts ${{secrets.GITHUB_TOKEN}}
