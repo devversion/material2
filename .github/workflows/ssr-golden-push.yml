@@ -18,6 +18,6 @@ jobs:
       - run: yarn install --frozen-lockfile --non-interactive
       # Run the script that is responsible for fetching the built screenshot golden and
       # pushing it back as a separate commit to the original pull request.
-      - run: yarn ts-node --project scripts/ scripts/github-actions/ssr-golden-push.ts
+      - run: yarn ts-node --project scripts/ scripts/github-actions/ssr-golden-push.ts ${{secrets.GITHUB_TOKEN}}
 
 
