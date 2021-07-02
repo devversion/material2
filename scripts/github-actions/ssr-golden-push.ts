@@ -65,7 +65,7 @@ async function main(authToken: string) {
 
   // Create a commit for the golden update and push it to the PR.
   runGit(['add', SCREENSHOT_GOLDEN_PATH]);
-  runGit(['commit', '-m', 'test: update kitchen-sink prerender screenshot golden']);
+  runGit(['commit', '-m', '"test: update kitchen-sink prerender screenshot golden"']);
   runGit(['push', prRemoteUrl, `HEAD:${pullRequest.head.ref}`]);
 
   info('Successfully updated pull request.');
