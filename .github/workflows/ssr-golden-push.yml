@@ -11,7 +11,13 @@ permissions:
 jobs:
   ssr-golden-push:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - run: echo Hello
+      # Checkout the default branch (i.e. `master`), and install the Yarn dependencies.
+      - uses: actions/checkout@v2
+      - run: yarn install --frozen-lockfile --non-interactive
+      # Run the script that is responsible for fetching the built screenshot golden and
+      # pushing it back as a separate commit to the original pull request.
+      - run: yarn ts-node --project scripts/ scripts/github-actions/ssr-golden-push.ts
 
 

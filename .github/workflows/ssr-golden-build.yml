@@ -1,4 +1,4 @@
-name: Approve SSR screenshot golden
+name: Build SSR screenshot golden
 
 on:
   pull_request_review:
