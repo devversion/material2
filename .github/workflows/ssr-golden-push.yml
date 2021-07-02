@@ -12,3 +12,6 @@ jobs:
   ssr-golden-push:
     runs-on: ubuntu-latest
     steps:
+      - run: echo Hello
+
+

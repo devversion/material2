@@ -4,9 +4,7 @@ on:
   pull_request_review:
     types: [submitted]
 
-permissions:
-  pull-requests: write
-  contents: write
+permissions: read-all
 
 jobs:
   ssr-golden-build:
@@ -21,10 +19,26 @@ jobs:
        github.event.review.user.login == github.event.pull_request.user.login
       )
     steps:
+      # Checkout the pull request, install Yarn dependencies and build the
+      # SSR screenshot golden so that it will be stored in the repo.
       - uses: actions/checkout@v2
       - run: yarn install --frozen-lockfile --non-interactive
       - run: bazel run //src/universal-app:screenshot_test.accept
+
+      # Store the pull request number in a file that can be uploaded as
+      # workflow artifact. This is needed to read it from the deploy workflow.
+      - run: echo ${{github.event.pull_request.number}} > pr_number
+
+      # Upload the generated SSR screenshot golden. The screenshot
+      # will be pushed to the pull request by the deploy action.
       - uses: actions/upload-artifact@v2
         with:
           name: screenshot
           path: goldens/kitchen-sink-prerendered.png
+
+      # Upload the file containing the pull request number.
+      # The PR number is used by the deploy action.
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pr_number
+          path: pr_number
