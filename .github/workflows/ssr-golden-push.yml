@@ -1,11 +1,10 @@
+# This is
 name: Push SSR screenshot golden to pull request
 
 on:
   workflow_run:
     workflows: [Build SSR screenshot golden]
     types: [completed]
-
-permissions: write-all
 
 jobs:
   ssr-golden-push:
@@ -14,6 +13,15 @@ jobs:
     steps:
       # Checkout the default branch (i.e. `master`), and install the Yarn dependencies.
       - uses: actions/checkout@v2
+      # Setup cache for node modules.
+      - uses: actions/cache@v2
+        with:
+          path: node_modules/
+          # Cache key. Whenever the postinstall patches change, the cache needs to be invalidated.
+          # If just the `yarn.lock` file changes, the most recent cache can be restored though.
+          # See: https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows#example-using-the-cache-action.
+          key: v1-${{hashFiles('tools/postinstall/apply-patches.js')}}-${{hashFiles('yarn.lock')}}
+          restore-keys: v1-${{hashFiles('tools/postinstall/apply-patches.js')}}-
       - run: yarn install --frozen-lockfile --non-interactive
       - run: git config --global user.email "robot@angular.io"
       - run: git config --global user.name "angular-robot"

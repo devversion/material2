@@ -1,3 +1,18 @@
+/**
+ * Script that runs as part of the `SSR Golden Push to Pull Request` github action. The SSR
+ * golden approval action is split into two sub-actions, where one action runs within an
+ * un-authenticated container in order to build the golden, and the other action takes the
+ * built screenshot golden and pushes it to the pull request (in an authenticated instance).
+ * This separation of concerns is necessary in order to prevent potential exploits of Github
+ * tokens. More information can be found here:
+ * https://securitylab.github.com/research/github-actions-preventing-pwn-requests/.
+ *
+ * This script determines the pull request and downloads screenshot golden from the
+ * unauthenticated action. Once complete, it ensures that the actor of this action has
+ * write permissions on the repository, or has authored the determined pull request.
+ * If these conditions are met, the golden is updated for the determined pull request.
+ */
+
 import {setFailed, info} from '@actions/core';
 import {getOctokit, context} from '@actions/github';
 import {spawnSync} from 'child_process';
@@ -8,6 +23,7 @@ import {writeFileSync} from 'fs';
 /** Type describing an Octokit instance. */
 type Octokit = ReturnType<typeof getOctokit>;
 
+/** Path to the SSR screenshot golden in the repository. */
 const SCREENSHOT_GOLDEN_PATH = 'goldens/kitchen-sink-prerendered.png';
 
 /** Entry point for the SSR golden push script. */
@@ -71,15 +87,18 @@ async function main(authToken: string) {
   info('Successfully updated pull request.');
 }
 
+/** Runs a Git command. Throws if the command fails. */
 function runGit(args: string[]): string {
   const {status, signal, stderr, stdout} = spawnSync('git', args, {shell: true, encoding: 'utf8'});
   if (status !== 0 || signal !== null) {
+    // The arguments can be printed as Github would sanitize secrets anyway.
     throw Error(`Git command failed: ${args.join(' ')}: ${stderr}`);
   }
   return stdout;
 }
 
 
+/** Downloads the specified artifact and returns an instance the read `ZipFile`. */
 async function downloadArtifact(octokit: Octokit, artifactId: number): Promise<ZipFile> {
   const {data} = await octokit.rest.actions.downloadArtifact(
     {...context.repo, artifact_id: artifactId, archive_format: 'zip'});
@@ -87,9 +106,10 @@ async function downloadArtifact(octokit: Octokit, artifactId: number): Promise<Z
   return new ZipFile(Buffer.from(data as any));
 }
 
+/** Gets whether the actor that triggered the current action has write permissions. */
 async function hasActorWritePermissions(octokit: Octokit): Promise<boolean> {
   const {data: {permission}} = await octokit.rest.repos.getCollaboratorPermissionLevel(
-    {...context.repo, username: context.actor})
+    {...context.repo, username: context.actor});
 
   // Possible values are not typed but can be extracted from the API specification.
   // https://docs.github.com/en/rest/reference/repos#get-repository-permissions-for-a-user.

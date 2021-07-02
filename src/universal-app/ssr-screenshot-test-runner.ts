@@ -26,7 +26,7 @@ interface WebTestMetadata {
   /**
    * List of web test files for the current browser. We limit our type to Chromium which
    * will be extracted at build time. More details on the properties:
-   * https://github.com/bazelbuild/rules_webtesting/blob/34c659ab3e78f41ebe6453bee6201a69aef90f56/go/metadata/web_test_files.go#L29.
+   * https://github.com/bazelbuild/rules_webtesting/blob/master/go/metadata/web_test_files.go#L29.
    */
   webTestFiles: {namedFiles: {CHROMIUM?: string}}[];
 }
@@ -89,8 +89,6 @@ async function main(goldenPath: string, approveGolden: boolean) {
   const numDiffPixels = pixelmatch(goldenScreenshot.data, currentScreenshot.data, diffImageData,
       currentScreenshot.width, currentScreenshot.height);
 
-      console.error('diff perc', numDiffPixels / (currentScreenshot.width * currentScreenshot.height));
-
   if (numDiffPixels !== 0) {
     writeFileSync(screenshotDiffPath, encode({
       data: diffImageData,
@@ -99,8 +97,16 @@ async function main(goldenPath: string, approveGolden: boolean) {
     }));
 
     console.error(`Expected golden image to match. ${numDiffPixels} pixels do not match.`);
-    console.error(`Command to update the golden: yarn bazel run ${process.env.TEST_TARGET}.accept`);
-    console.error(`See diff: file://${screenshotDiffPath.replace(/\\/g, '/')}`);
+
+    // Unfortunately screenshot goldens vary based on platforms. This means that developers
+    // cannot simply run the `.accept` target locally on their machine. Instead we have a Github
+    // action that builds the golden on a linux machine so that it matches with the image being
+    // taken in the CI test jobs. We suggest that the golden is approved using the Github action.
+    // Note: When updating this command here, also update the action `ssr-golden-build.yml`.
+    console.error(`To update the golden: Submit a review on your pull request ` +
+        `with: /approve-ssr-golden`);
+    console.error(`The diff can be inspected with (if you run the test locally): ` +
+        `file://${screenshotDiffPath.replace(/\\/g, '/')}`);
     process.exit(1);
   }
 
