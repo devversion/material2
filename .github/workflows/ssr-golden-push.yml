@@ -19,6 +19,6 @@ jobs:
       - run: git config --global user.name "angular-robot"
       # Run the script that is responsible for fetching the built screenshot golden and
       # pushing it back as a separate commit to the original pull request.
-      - run: yarn ts-node --project scripts/tsconfig.json scripts/github-actions/ssr-golden-push.ts ${{secrets.GITHUB_TOKEN}}
+      - run: yarn ts-node --project scripts/tsconfig.json scripts/github-actions/ssr-golden-push.ts ${{secrets.REPO_TOKEN}}
 
 
