@@ -97,7 +97,14 @@ async function hasActorWritePermissions(octokit: Octokit): Promise<boolean> {
 }
 
 if (require.main === module) {
-  main(process.argv[0]!).catch(e => {
+  // First argument of the CLI is the Github authentication token.
+  const authToken = process.argv[2];
+
+  if (authToken === undefined) {
+    throw Error('Expected Github authentication token to be specified as first argument.');
+  }
+
+  main(authToken).catch(e => {
     console.error(e);
     process.exit(1);
   });
