@@ -1,24 +1,23 @@
-load("@npm//@bazel/esbuild:index.bzl", "esbuild")
-
-"""Creates an ESBuild configuration file for configuring AMD output."""
-
-def _create_esbuild_config(module_name):
-    # Workaround in ESBuild to support AMD module output.
-    # TODO: Remove once https://github.com/evanw/esbuild/issues/507 is fixed.
-    return {
-        "globalName": "__exports",
-        "banner": {"js": "define(\"%s\",[],function(){" % module_name},
-        "footer": {"js": "return __exports;})"},
-    }
+load("@npm//@bazel/esbuild:index.bzl", "esbuild", "esbuild_config")
+load("@npm//@angular/dev-infra-private/bazel:expand_template.bzl", "expand_template")
 
 """Generates an AMD bundle for the specified entry-point with the given AMD module name."""
 
 def esbuild_amd(name, entry_point, module_name, testonly, deps):
-    native.genrule(
+    expand_template(
         name = "%s_config" % name,
-        outs = ["%s_config.json" % name],
-        cmd = """echo '%s' > $@""" % json.encode(_create_esbuild_config(module_name)),
         testonly = testonly,
+        template = "//src/material-date-fns-adapter:esbuild-amd-config.mjs",
+        output_name = "%s_config.mjs" % name,
+        substitutions = {
+            "TMPL_MODULE_NAME": module_name,
+        },
+    )
+
+    esbuild_config(
+        name = "%s_config_lib" % name,
+        testonly = testonly,
+        config_file = "%s_config" % name,
     )
 
     esbuild(
@@ -30,7 +29,7 @@ def esbuild_amd(name, entry_point, module_name, testonly, deps):
         platform = "browser",
         target = "es2015",
         entry_point = entry_point,
-        args_file = "%s_config.json" % name,
+        config = "%s_config_lib" % name,
     )
 
     native.filegroup(
