@@ -12,11 +12,17 @@ import {DevServer} from './dev-server';
 import {setupBazelWatcherSupport} from './ibazel';
 
 const args = process.argv.slice(2);
-const {root_paths: _rootPathsRaw, port, historyApiFallback} =
-    minimist(args, {boolean: 'historyApiFallback'});
-const rootPaths = _rootPathsRaw ? _rootPathsRaw.split(',') : ['/'];
+const {
+  root_paths: _rootPathsRaw,
+  index_bootstrap_scripts: _indexBootstrapScripts,
+  port,
+  historyApiFallback
+} = minimist(args, {boolean: 'historyApiFallback'});
 
-const server = new DevServer(port, rootPaths, historyApiFallback);
+const rootPaths = _rootPathsRaw ? _rootPathsRaw.split(',') : ['/'];
+const indexBootstrapScripts = _indexBootstrapScripts ? _indexBootstrapScripts.split(',') : [];
+
+const server = new DevServer(port, rootPaths, indexBootstrapScripts, historyApiFallback);
 
 // Setup ibazel support.
 setupBazelWatcherSupport(server);

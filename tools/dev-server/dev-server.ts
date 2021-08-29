@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+import {runfiles} from '@bazel/runfiles';
 import {readFileSync, existsSync} from 'fs';
 import * as browserSync from 'browser-sync';
 import * as http from 'http';
@@ -38,7 +39,9 @@ export class DevServer {
   };
 
   constructor(
-      readonly port: number, private _rootPaths: string[],
+      readonly port: number,
+      private _rootPaths: string[],
+      private _indexBootstrapScripts: string[],
       private _historyApiFallback: boolean = false) {}
 
   /** Starts the server on the given port. */
@@ -104,7 +107,7 @@ export class DevServer {
   private _resolveUrlFromRunfiles(url: string): string|null {
     for (let rootPath of this._rootPaths) {
       try {
-        return require.resolve(path.posix.join(rootPath, getManifestPath(url)));
+        return runfiles.resolve(path.posix.join(rootPath, getManifestPath(url)));
       } catch {}
     }
     return null;
@@ -119,17 +122,33 @@ export class DevServer {
         throw Error('Could not resolve dev server index.html');
       }
 
-      // We support specifying a variables.json file next to the index.html which will be inlined
-      // into the dev app as a `script` tag. It is used to pass in environment-specific variables.
-      const varsPath = path.join(path.dirname(indexPath), 'variables.json');
-      const scriptTag = '<script>window.DEV_APP_VARIABLES = ' +
-        (existsSync(varsPath) ? readFileSync(varsPath, 'utf8') : '{}') + ';</script>';
+      const htmlTagsToInsert = [
+        this._getUserVariablesScript(indexPath),
+        ...this._indexBootstrapScripts.map(scriptManifestPath =>
+            `<script src="${scriptManifestPath}"></script>`),
+      ];
+
       const content = readFileSync(indexPath, 'utf8');
       const headIndex = content.indexOf('</head>');
-      this._index = content.slice(0, headIndex) + scriptTag + content.slice(headIndex);
+
+      this._index = content.slice(0, headIndex) +
+          htmlTagsToInsert.join('\n') + content.slice(headIndex);
     }
 
     return this._index;
+  }
+
+  /**
+   * Gets a HTML script tag that provides the user variables for a given index file in the
+   * global this (i.e. `window`).
+   *
+   * We support specifying a `variables.json` file next to the `index.html` which will be inlined
+   * into the dev app as a `script` tag. It is used to pass in environment-specific variables.
+   */
+  private _getUserVariablesScript(indexFilePath: string): string {
+    const varsPath = path.join(path.dirname(indexFilePath), 'variables.json');
+    return '<script>window.DEV_APP_VARIABLES = ' +
+      (existsSync(varsPath) ? readFileSync(varsPath, 'utf8') : '{}') + ';</script>';
   }
 }
 

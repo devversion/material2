@@ -11,10 +11,23 @@ def _get_workspace_name(ctx):
     else:
         return ctx.workspace_name
 
+"""
+Gets the Bazel manifest path for a given file. Manifest paths are used within Bazel runfile
+manifests and are formatted as followed: `<workspace_name>/<workspace_relative_file_path>`
+"""
+
+def _to_manifest_path(ctx, file):
+    # If a file resides outside of the current workspace, we omit the leading `../`
+    # segment as the rest will contain the workspace name. e.g. `../npm/node_modules/<..>`.
+    if file.short_path.startswith("../"):
+        return file.short_path[3:]
+    else:
+        return ctx.workspace_name + "/" + file.short_path
+
 """Implementation of the dev server rule."""
 
 def _dev_server_rule_impl(ctx):
-    files = depset(ctx.files.srcs)
+    files = depset(ctx.files.srcs + ctx.files.index_bootstrap_scripts)
 
     # List of files which are required for the devserver to run. This includes the
     # bazel runfile helpers (to resolve runfiles in bash) and the devserver binary
@@ -36,12 +49,15 @@ def _dev_server_rule_impl(ctx):
 
     workspace_name = _get_workspace_name(ctx)
     root_paths = ["", "/".join([workspace_name, ctx.label.package])] + ctx.attr.additional_root_paths
+    index_bootstrap_scripts = [_to_manifest_path(ctx, f) for f in ctx.files.index_bootstrap_scripts]
 
     # We can't use "ctx.actions.args()" because there is no way to convert the args object
     # into a string representing the command line arguments. It looks like bazel has some
     # internal logic to compute the string representation of "ctx.actions.args()".
     args = '--root_paths="%s" ' % ",".join(root_paths)
     args += "--port=%s " % ctx.attr.port
+
+    args += '--index_bootstrap_scripts="%s" ' % ",".join(index_bootstrap_scripts)
 
     if ctx.attr.historyApiFallback:
         args += "--historyApiFallback "
@@ -80,6 +96,11 @@ dev_server_rule = rule(
               used for TypeScript targets which provide multiple flavors of output.
             """,
         ),
+        "index_bootstrap_scripts": attr.label_list(
+            doc = "Scripts to automatically load in the top-level index HTML file",
+            allow_files = True,
+            default = [],
+        ),
         "historyApiFallback": attr.bool(
             default = True,
             doc = """
@@ -114,6 +135,7 @@ def dev_server(name, testonly = False, tags = [], **kwargs):
     dev_server_rule(
         name = "%s_launcher" % name,
         visibility = ["//visibility:private"],
+        testonly = testonly,
         tags = tags,
         **kwargs
     )

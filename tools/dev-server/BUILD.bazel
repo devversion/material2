@@ -20,6 +20,7 @@ ts_library(
         "@npm//browser-sync",
         "@npm//minimist",
         "@npm//send",
+        "@npm//@bazel/runfiles",
     ],
 )
 
