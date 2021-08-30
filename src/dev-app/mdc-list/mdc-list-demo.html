@@ -1,3 +1,87 @@
+<h1>new API</h1>
+
+<mat-list>
+  <!-- Single Line List. No wrapping. -->
+  <mat-list-item>
+    Single line list. Text will not wrap.
+  </mat-list-item>
+
+  <!-- Two Line List. No wrapping. -->
+  <mat-list-item>
+    <span matListItemTitle>Title</span>
+    <span matListItemLine>Second line w/ ellipsis</span>
+  </mat-list-item>
+
+  <!-- Two Line List. No wrapping -->
+  <mat-list-item>
+    <span matListItemTitle>Title</span>
+    Second line w/ ellipsis
+  </mat-list-item>
+
+  <!-- Three Line list, where the second line wraps into the third. -->
+  <mat-list-item>
+    <span matListItemTitle>Title</span>
+    <span matListItemLine wrap>Second line that can wrap.</span>
+  </mat-list-item>
+
+  <!-- Three Line List, with a dedicated third-line. i.e. tertiary line -->
+  <mat-list-item>
+    <span matListItemTitle>Title</span>
+    <span matListItemLine>Second line w/ ellipsis</span>
+    <span matListItemLine>Third line w/ ellipsis</span>
+  </mat-list-item>
+</mat-list>
+
+<!-- ########## EDGE CASES -->
+
+<mat-list>
+  <mat-list-item>
+    <span matListItemTitle>Title</span>
+    <!-- should this switch based on whether there is text or not? -->
+  </mat-list-item>
+
+  <!-- Should this work for backwards compatibility? -->
+  <mat-list-item>
+    <span matListItemLine>First</span>
+    <span matListItemLine>Second</span>
+    <span matListItemLine>Third</span>
+  </mat-list-item>
+</mat-list>
+
+<!-- Alternative -->
+
+<mat-list>
+  <!-- Single Line List. No wrapping. -->
+  <mat-list-item>
+    Single line list. Text will not wrap.
+  </mat-list-item>
+
+  <!-- Two Line List. No wrapping. -->
+  <mat-list-item>
+    <span matListItemTitle>Title</span>
+    <span matListItemLine>Second line w/ ellipsis</span>
+  </mat-list-item>
+
+  <!-- Two Line List. No wrapping -->
+  <mat-list-item>
+    <span matListItemTitle>Title</span>
+    Second line w/ ellipsis
+  </mat-list-item>
+
+  <!-- Three Line list, where the second line wraps into the third. -->
+  <mat-list-item>
+    <span matListItemTitle>Title</span>
+    <span matListItemLine allowWrapping>Second line that can wrap.</span>
+  </mat-list-item>
+
+  <!-- Three Line List, with a dedicated third-line. i.e. tertiary line -->
+  <mat-list-item>
+    <span matListItemTitle>Title</span>
+    <span matListItemLine>Second line w/ ellipsis</span>
+    <span matListItemLine>Third line w/ ellipsis</span>
+  </mat-list-item>
+</mat-list>
+
 
 <h1>mat-list demo</h1>
 
