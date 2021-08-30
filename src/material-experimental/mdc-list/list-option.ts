@@ -37,6 +37,10 @@ import {
 import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
 import {MatListBase, MatListItemBase} from './list-base';
 import {LIST_OPTION, ListOption, MatListOptionCheckboxPosition} from './list-option-types';
+import {
+  MatListItemLine,
+  MatListItemTitle
+} from '@angular/material-experimental/mdc-list/list-styling';
 
 /**
  * Injection token that can be used to reference instances of an `SelectionList`. It serves
@@ -110,8 +114,11 @@ export class MatListOption extends MatListItemBase implements ListOption, OnInit
 
   @ViewChild('text') _itemText: ElementRef<HTMLElement>;
 
-  @ContentChildren(MatLine, {read: ElementRef, descendants: true}) lines:
-    QueryList<ElementRef<Element>>;
+  // TODO: fixup
+  @ViewChild('text') _unscopedText: ElementRef<HTMLElement>;
+
+  @ContentChildren(MatListItemLine, {descendants: true}) _lines: QueryList<MatListItemLine>;
+  @ContentChildren(MatListItemTitle, {descendants: true}) _titles: QueryList<MatListItemTitle>;
 
   /** Whether the label should appear before or after the checkbox. Defaults to 'after' */
   @Input() checkboxPosition: MatListOptionCheckboxPosition = 'after';

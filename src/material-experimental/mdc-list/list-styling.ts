@@ -9,6 +9,18 @@
 import {Directive, Inject, Optional} from '@angular/core';
 import {LIST_OPTION, ListOption} from './list-option-types';
 
+@Directive({
+  selector: '[matListItemTitle]',
+  host: {'class': 'mdc-list-item__primary-text'},
+})
+export class MatListItemTitle {}
+
+@Directive({
+  selector: '[matListItemLine]',
+  host: {'class': 'mdc-list-item__secondary-text'},
+})
+export class MatListItemLine {}
+
 /**
  * MDC uses the very intuitively named classes `.mdc-list-item__start` and `.mat-list-item__end`
  * to position content such as icons or checkboxes that comes either before or after the text

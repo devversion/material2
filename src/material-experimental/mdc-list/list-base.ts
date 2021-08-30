@@ -9,7 +9,7 @@
 import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
 import {Platform} from '@angular/cdk/platform';
 import {
-  AfterContentInit,
+  AfterContentInit, AfterViewInit,
   ContentChildren,
   Directive,
   ElementRef,
@@ -30,9 +30,14 @@ import {
   setLines,
 } from '@angular/material-experimental/mdc-core';
 import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
-import {Subscription} from 'rxjs';
+import {combineLatest, Subscription} from 'rxjs';
 import {startWith} from 'rxjs/operators';
-import {MatListAvatarCssMatStyler, MatListIconCssMatStyler} from './list-styling';
+import {
+  MatListAvatarCssMatStyler,
+  MatListIconCssMatStyler,
+  MatListItemLine,
+  MatListItemTitle
+} from './list-styling';
 
 function toggleClass(el: Element, className: string, on: boolean) {
   if (on) {
@@ -44,12 +49,17 @@ function toggleClass(el: Element, className: string, on: boolean) {
 
 @Directive()
 /** @docs-private */
-export abstract class MatListItemBase implements AfterContentInit, OnDestroy, RippleTarget {
+export abstract class MatListItemBase implements AfterViewInit, OnDestroy, RippleTarget {
+  /** Query list matching list-item title elements. */
+  abstract _titles: QueryList<MatListItemTitle>;
   /** Query list matching list-item line elements. */
-  abstract lines: QueryList<ElementRef<Element>>;
+  abstract _lines: QueryList<MatListItemLine>;
 
   /** Element reference referring to the primary list item text. */
-  abstract _itemText: ElementRef<HTMLElement>;
+  abstract _itemText: ElementRef<HTMLElement>|undefined;
+
+  abstract _unscopedText: ElementRef<HTMLElement>|undefined;
+
 
   /** Host element for the list item. */
   _hostElement: HTMLElement;
@@ -91,8 +101,10 @@ export abstract class MatListItemBase implements AfterContentInit, OnDestroy, Ri
    */
   get rippleDisabled(): boolean { return this.disableRipple || !!this.rippleConfig.disabled; }
 
-  constructor(public _elementRef: ElementRef<HTMLElement>, protected _ngZone: NgZone,
-              private _listBase: MatListBase, private _platform: Platform,
+  constructor(public _elementRef: ElementRef<HTMLElement>,
+              protected _ngZone: NgZone,
+              private _listBase: MatListBase,
+              private _platform: Platform,
               @Optional() @Inject(MAT_RIPPLE_GLOBAL_OPTIONS)
                   globalRippleOptions?: RippleGlobalOptions,
               @Optional() @Inject(ANIMATION_MODULE_TYPE) animationMode?: string) {
@@ -113,7 +125,7 @@ export abstract class MatListItemBase implements AfterContentInit, OnDestroy, Ri
     }
   }
 
-  ngAfterContentInit() {
+  ngAfterViewInit() {
     this._monitorLines();
   }
 
@@ -134,6 +146,14 @@ export abstract class MatListItemBase implements AfterContentInit, OnDestroy, Ri
     return !!(this._avatars.length || this._icons.length);
   }
 
+  _hasUnscopedText() {
+    if (this._unscopedText === undefined) {
+      return false;
+    }
+    return Array.from(this._unscopedText.nativeElement.childNodes).some(node =>
+      node.nodeType !== node.COMMENT_NODE && node.textContent !== null && node.textContent.trim() !== '');
+  }
+
   private _initInteractiveListItem() {
     this._hostElement.classList.add('mat-mdc-list-item-interactive');
     this._rippleRenderer =
@@ -147,24 +167,35 @@ export abstract class MatListItemBase implements AfterContentInit, OnDestroy, Ri
    */
   private _monitorLines() {
     this._ngZone.runOutsideAngular(() => {
-      this._subscriptions.add(this.lines.changes.pipe(startWith(this.lines))
-          .subscribe((lines: QueryList<ElementRef<Element>>) => {
-            toggleClass(this._hostElement, 'mat-mdc-list-item-single-line', lines.length <= 1);
-            toggleClass(this._hostElement, 'mdc-list-item--with-one-line', lines.length <= 1);
-
-            lines.forEach((line: ElementRef<Element>, index: number) => {
-              toggleClass(
-                this._hostElement, 'mdc-list-item--with-two-lines', lines.length === 2);
-              toggleClass(
-                this._hostElement, 'mdc-list-item--with-three-lines', lines.length === 3);
-              toggleClass(line.nativeElement,
-                  'mdc-list-item__primary-text', index === 0 && lines.length > 1);
-              toggleClass(
-                  line.nativeElement, 'mdc-list-item__secondary-text', index !== 0);
-            });
-            setLines(lines, this._elementRef, 'mat-mdc');
-          }));
+      this._subscriptions.add(combineLatest([this._lines.changes, this._titles.changes]).pipe(startWith(null))
+          .subscribe(() => this._refreshListVariant()));
     });
+  }
+
+  _refreshListVariant() {
+    const hasUnscopedText = this._hasUnscopedText();
+    let numLines = this._lines.length + this._titles.length;
+
+    if (numLines === 1 && hasUnscopedText) {
+      numLines += 2;
+    } else if (hasUnscopedText) {
+      numLines += 1;
+    }
+
+    if (numLines === 1 && hasUnscopedText) {
+      this._unscopedText?.nativeElement.classList.toggle('mdc-list-item__primary-text', true);
+      this._unscopedText?.nativeElement.classList.toggle('mdc-list-item__secondary-text', false);
+    } else if (hasUnscopedText) {
+      this._unscopedText?.nativeElement.classList.toggle('mdc-list-item__primary-text', false);
+      this._unscopedText?.nativeElement.classList.toggle('mdc-list-item__secondary-text', true);
+    }
+
+    toggleClass(this._hostElement, 'mat-mdc-list-item-single-line', numLines <= 1);
+    toggleClass(this._hostElement, 'mdc-list-item--with-one-line', numLines <= 1);
+    toggleClass(
+      this._hostElement, 'mdc-list-item--with-two-lines', numLines === 2);
+    toggleClass(
+      this._hostElement, 'mdc-list-item--with-three-lines', numLines === 3);
   }
 
   static ngAcceptInputType_disabled: BooleanInput;

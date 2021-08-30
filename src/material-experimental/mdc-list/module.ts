@@ -21,14 +21,16 @@ import {MatListOption} from './list-option';
 import {
   MatListAvatarCssMatStyler,
   MatListGraphicAlignmentStyler,
-  MatListIconCssMatStyler,
+  MatListIconCssMatStyler, MatListItemLine, MatListItemTitle,
   MatListSubheaderCssMatStyler
 } from './list-styling';
 import {MatNavList} from './nav-list';
 import {MatSelectionList} from './selection-list';
+import {ObserversModule} from '@angular/cdk/observers';
 
 @NgModule({
   imports: [
+    ObserversModule,
     CommonModule,
     MatCommonModule,
     MatLineModule,
@@ -42,6 +44,8 @@ import {MatSelectionList} from './selection-list';
     MatSelectionList,
     MatListItem,
     MatListOption,
+    MatListItemTitle,
+    MatListItemLine,
     MatListAvatarCssMatStyler,
     MatListIconCssMatStyler,
     MatListSubheaderCssMatStyler,
@@ -56,6 +60,8 @@ import {MatSelectionList} from './selection-list';
     MatSelectionList,
     MatListItem,
     MatListOption,
+    MatListItemTitle,
+    MatListItemLine,
     MatListAvatarCssMatStyler,
     MatListIconCssMatStyler,
     MatListSubheaderCssMatStyler,
