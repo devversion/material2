@@ -5,6 +5,11 @@ workspace(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+http_archive(
+    name = "io_bazel_rules_webtesting",
+    urls = ["https://github.com/devversion/rules_webtesting/releases/download/v0.2.0/0.0.5.zip"],
+)
+
 # Add NodeJS rules
 http_archive(
     name = "build_bazel_rules_nodejs",

@@ -6,22 +6,33 @@
     Single line list. Text will not wrap.
   </mat-list-item>
 
+  <!-- above is equivalent to -->
+  <mat-list-item>
+    <span matListItemLine>Single line list.</span>
+  </mat-list-item>
+
+
   <!-- Two Line List. No wrapping. -->
   <mat-list-item>
     <span matListItemTitle>Title</span>
     <span matListItemLine>Second line w/ ellipsis</span>
   </mat-list-item>
 
-  <!-- Two Line List. No wrapping -->
+  <!-- above is equivalent to: -->
   <mat-list-item>
     <span matListItemTitle>Title</span>
     Second line w/ ellipsis
   </mat-list-item>
 
-  <!-- Three Line list, where the second line wraps into the third. -->
-  <mat-list-item>
+
+  <!--
+    Three Line list, where the second line wraps into the third.
+
+
+   --
+  <mat-list-item [lines]="3">
     <span matListItemTitle>Title</span>
-    <span matListItemLine wrap>Second line that can wrap.</span>
+    Second line that can wrap.
   </mat-list-item>
 
   <!-- Three Line List, with a dedicated third-line. i.e. tertiary line -->
