@@ -52,24 +52,12 @@ async function main() {
 }
 
 function applyPatches() {
-  // Workaround for https://github.com/angular/angular/issues/18810.
-  shelljs.exec('ngc -p angular-tsconfig.json');
-
   // Workaround for: https://github.com/angular/angular/pull/32650
   searchAndReplace(
-      'var resolvedEntryPoint = null;', `
-    var resolvedEntryPoint = tsFiles.find(f => f.endsWith('/public-api.ts')) || null;
+      'let resolvedEntryPoint = null;', `
+    let resolvedEntryPoint = tsFiles.find(f => f.endsWith('/public-api.ts')) || null;
   `,
-      'node_modules/@angular/compiler-cli/src/ngtsc/entry_point/src/logic.js');
-
-  // Workaround for: https://github.com/bazelbuild/rules_nodejs/issues/1208.
-  applyPatch(path.join(__dirname, './manifest_externs_hermeticity.patch'));
-
-  // Workaround for https://github.com/angular/angular/issues/33452:
-  searchAndReplace(
-      /angular_compiler_options = {/, `$&
-          "strictTemplates": True,`,
-      'node_modules/@angular/bazel/src/ng_module.bzl');
+      'node_modules/@angular/compiler-cli/bundles/index.js');
 
   // More info in https://github.com/angular/angular/pull/33786
   shelljs.rm('-rf', [

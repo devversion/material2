@@ -58,52 +58,23 @@ MDC_PACKAGE_UMD_BUNDLES = {
     "@material/top-app-bar": "@npm//:node_modules/@material/top-app-bar/dist/mdc.topAppBar.js",
 }
 
-# List of default Angular library UMD bundles which are not processed by ngcc.
-ANGULAR_NO_NGCC_BUNDLES = [
-    ("@angular/compiler", ["compiler.umd.js"]),
-    ("@angular/localize", ["localize.umd.js", "localize-init.umd.js"]),
+ANGULAR_PACKAGES_CONFIG = [
+    ("@angular/animations", ["browser"]),
+    ("@angular/common", ["http/testing", "http", "testing"]),
+    ("@angular/compiler", ["testing"]),
+    ("@angular/core", ["testing"]),
+    ("@angular/forms", []),
+    ("@angular/platform-browser", ["testing", "animations"]),
+    ("@angular/platform-browser-dynamic", ["testing"]),
+    ("@angular/router", []),
+    ("@angular/localize", ["init"]),
 ]
 
-# List of Angular library UMD bundles which will are processed by ngcc.
-ANGULAR_NGCC_BUNDLES = [
-    ("@angular/animations", ["animations-browser.umd.js", "animations.umd.js"]),
-    ("@angular/common", ["common-http-testing.umd.js", "common-http.umd.js", "common-testing.umd.js", "common.umd.js"]),
-    ("@angular/compiler", ["compiler-testing.umd.js"]),
-    ("@angular/core", ["core-testing.umd.js", "core.umd.js"]),
-    ("@angular/forms", ["forms.umd.js"]),
-    ("@angular/platform-browser-dynamic", ["platform-browser-dynamic-testing.umd.js", "platform-browser-dynamic.umd.js"]),
-    ("@angular/platform-browser", ["platform-browser.umd.js", "platform-browser-testing.umd.js", "platform-browser-animations.umd.js"]),
-    ("@angular/router", ["router.umd.js"]),
+ANGULAR_PACKAGES = [
+    struct(
+        name = name[len("@angular/"):],
+        entry_points = entry_points,
+        module_name = name,
+    )
+    for name, entry_points in ANGULAR_PACKAGES_CONFIG
 ]
-
-"""
-  Gets a dictionary of all packages and their bundle names.
-"""
-
-def getFrameworkPackageBundles():
-    res = {}
-    for pkgName, bundleNames in ANGULAR_NGCC_BUNDLES + ANGULAR_NO_NGCC_BUNDLES:
-        res[pkgName] = res.get(pkgName, []) + bundleNames
-    return res
-
-"""
-  Gets a list of labels which resolve to the UMD bundles of the given packages.
-"""
-
-def getUmdFilePaths(packages, ngcc_artifacts):
-    tmpl = "@npm//:node_modules/%s" + ("/__ivy_ngcc__" if ngcc_artifacts else "") + "/bundles/%s"
-    return [
-        tmpl % (pkgName, bundleName)
-        for pkgName, bundleNames in packages
-        for bundleName in bundleNames
-    ]
-
-ANGULAR_PACKAGE_BUNDLES = getFrameworkPackageBundles()
-
-ANGULAR_LIBRARY_IVY_UMDS = getUmdFilePaths(ANGULAR_NO_NGCC_BUNDLES, False) + \
-                           getUmdFilePaths(ANGULAR_NGCC_BUNDLES, True)
-
-"""Gets the list of targets for the Angular library UMD bundles."""
-
-def getAngularUmdTargets():
-    return ANGULAR_LIBRARY_IVY_UMDS

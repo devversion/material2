@@ -1,8 +1,9 @@
-load("//:rollup-globals.bzl", "ROLLUP_GLOBALS")
+load("//:pkg-externals.bzl", "PKG_EXTERNALS")
 load("//src/cdk:config.bzl", "CDK_ENTRYPOINTS")
 load("//src/cdk-experimental:config.bzl", "CDK_EXPERIMENTAL_ENTRYPOINTS")
 load("//src/material:config.bzl", "MATERIAL_ENTRYPOINTS", "MATERIAL_TESTING_ENTRYPOINTS")
 load("//src/material-experimental:config.bzl", "MATERIAL_EXPERIMENTAL_ENTRYPOINTS", "MATERIAL_EXPERIMENTAL_TESTING_ENTRYPOINTS")
+load("//tools/esbuild:index.bzl", "esbuild_amd")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -12,9 +13,9 @@ exports_files([
 ])
 
 genrule(
-    name = "rollup_globals",
-    outs = ["rollup_globals.json"],
-    cmd = "echo '%s' > $@" % ROLLUP_GLOBALS,
+    name = "pkg_externals",
+    outs = ["pkg_externals.json"],
+    cmd = "echo '%s' > $@" % PKG_EXTERNALS,
 )
 
 entryPoints = ["cdk/%s" % e for e in CDK_ENTRYPOINTS] + \
@@ -26,4 +27,12 @@ genrule(
     name = "entry_points_manifest",
     outs = ["entry_points_manifest.json"],
     cmd = "echo '%s' > $@" % entryPoints,
+)
+
+esbuild_amd(
+    name = "core_amd",
+    testonly = False,
+    entry_point = "@npm//:node_modules/@angular/core/fesm2020/core.mjs",
+    module_name = "@angular/core",
+    deps = [],
 )

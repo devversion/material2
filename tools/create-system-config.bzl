@@ -1,5 +1,5 @@
 load("@npm//@angular/dev-infra-private/bazel:expand_template.bzl", "expand_template")
-load("//:packages.bzl", "ANGULAR_PACKAGE_BUNDLES", "MDC_PACKAGE_UMD_BUNDLES")
+load("//:packages.bzl", "ANGULAR_PACKAGES", "MDC_PACKAGE_UMD_BUNDLES")
 load("//src/cdk:config.bzl", "CDK_ENTRYPOINTS")
 load("//src/cdk-experimental:config.bzl", "CDK_EXPERIMENTAL_ENTRYPOINTS")
 load("//src/material:config.bzl", "MATERIAL_ENTRYPOINTS", "MATERIAL_TESTING_ENTRYPOINTS")
@@ -28,7 +28,7 @@ def create_system_config(
         name = name,
         output_name = output_name,
         substitutions = {
-            "$ANGULAR_PACKAGE_BUNDLES": str(ANGULAR_PACKAGE_BUNDLES),
+            "$ANGULAR_PACKAGE_BUNDLES": str(ANGULAR_PACKAGES),
             "$MDC_PACKAGE_UMD_BUNDLES": str(MDC_PACKAGE_UMD_BUNDLES),
             "$BASE_URL": base_url,
             "$CDK_ENTRYPOINTS_TMPL": str(CDK_ENTRYPOINTS),

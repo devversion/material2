@@ -27,7 +27,7 @@ module.exports = {
   plugins: [
     buildOptimizerPlugin,
     node({
-      mainFields: ['es2015_ivy_ngcc', 'module_ivy_ngcc','es2015', 'module'],
+      mainFields: ['es2020', 'module'],
     }),
   ],
 };
