@@ -12,6 +12,8 @@ ts_library(
         "@npm//@babel/traverse",
         "@npm//@types/node",
     ],
+    # TODO(devversion): remove this once the Bazel NodeJS rules can handle ESM with `nodejs_binary`.
+    devmode_module = "commonjs",
 )
 
 # Exposes the `linker-process` tool as executable so that it can be used as

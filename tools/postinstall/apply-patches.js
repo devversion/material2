@@ -14,7 +14,7 @@ const chalk = require('chalk');
  * Version of the post install patch. Needs to be incremented when
  * existing patches or edits have been modified.
  */
-const PATCH_VERSION = 10;
+const PATCH_VERSION = 11;
 
 /** Path to the project directory. */
 const projectDir = path.join(__dirname, '../..');
@@ -58,6 +58,9 @@ function applyPatches() {
     let resolvedEntryPoint = tsFiles.find(f => f.endsWith('/public-api.ts')) || null;
   `,
       'node_modules/@angular/compiler-cli/bundles/index.js');
+
+  // Switches the devmode output for Angular Bazel to ES2020 target and module.
+  applyPatch(path.join(__dirname, './devmode-es2020-bazel.patch'));
 
   // More info in https://github.com/angular/angular/pull/33786
   shelljs.rm('-rf', [

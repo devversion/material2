@@ -11,6 +11,8 @@ load("//:packages.bzl", "MDC_PACKAGE_UMD_BUNDLES", "VERSION_PLACEHOLDER_REPLACEM
 load("//:pkg-externals.bzl", "PKG_EXTERNALS")
 load("//tools/markdown-to-html:index.bzl", _markdown_to_html = "markdown_to_html")
 load("//tools/linker-process:index.bzl", "linker_process")
+load("//tools/esbuild:index.bzl", "esbuild")
+load("//tools/spec-bundling:index.bzl", "spec_bundle")
 
 _DEFAULT_TSCONFIG_BUILD = "//src:bazel-tsconfig-build.json"
 _DEFAULT_TSCONFIG_TEST = "//src:tsconfig-test"
@@ -57,7 +59,7 @@ def sass_library(**kwargs):
 def npm_sass_library(**kwargs):
     _npm_sass_library(**kwargs)
 
-def ts_library(tsconfig = None, deps = [], testonly = False, **kwargs):
+def ts_library(tsconfig = None, deps = [], testonly = False, devmode_module = None, **kwargs):
     # Add tslib because we use import helpers for all public packages.
     local_deps = ["@npm//tslib"] + deps
 
@@ -74,6 +76,14 @@ def ts_library(tsconfig = None, deps = [], testonly = False, **kwargs):
         # NodeJS executions, by activating the Bazel NodeJS linker.
         # See: https://github.com/bazelbuild/rules_nodejs/pull/2799.
         package_name = module_name,
+        # For prodmode, the target is set to `ES2020`. `@bazel/typecript` sets `ES2015` by default. Not
+        # that this should be in sync with the `ng_module` tsconfig generation to emit proper APF v13.
+        # https://github.com/bazelbuild/rules_nodejs/blob/901df3868e3ceda177d3ed181205e8456a5592ea/third_party/github.com/bazelbuild/rules_typescript/internal/common/tsconfig.bzl#L195
+        prodmode_target = "es2020",
+        # We also set devmode output to the same settings as prodmode as a first step in combining
+        # devmode and prodmode output. We will not rely on AMD output anyway due to the linker processing.
+        devmode_target = "es2020",
+        devmode_module = devmode_module if devmode_module != None else "esnext",
         tsconfig = tsconfig,
         testonly = testonly,
         deps = local_deps,
@@ -250,8 +260,13 @@ def karma_web_test_suite(name, **kwargs):
     kwargs["deps"] = select({
         # Based on whether partial compilation is enabled, use the linker processed dependencies.
         "//tools:partial_compilation_enabled": ["%s_linker_processed_deps" % name],
-        "//conditions:default": test_deps,
+        "//conditions:default": ["%s_bundle" % name],
     })
+
+    spec_bundle(
+        name = "%s_bundle" % name,
+        deps = test_deps,
+    )
 
     linker_process(
         name = "%s_linker_processed_deps" % name,

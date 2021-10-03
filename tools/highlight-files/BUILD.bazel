@@ -13,6 +13,8 @@ ts_library(
         "@npm//@types/node",
         "@npm//fs-extra",
     ],
+    # TODO(devversion): remove this once the Bazel NodeJS rules can handle ESM with `nodejs_binary`.
+    devmode_module = "commonjs",
 )
 
 nodejs_binary(

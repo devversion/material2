@@ -1,0 +1,8 @@
+load("//tools/esbuild:index.bzl", "esbuild", "esbuild_amd", "esbuild_config")
+
+package(default_visibility = ["//visibility:public"])
+
+esbuild_config(
+    name = "esbuild_config",
+    config_file = "esbuild.config.mjs",
+)
