@@ -10,13 +10,14 @@ import {waitForAsync, ComponentFixture, TestBed} from '@angular/core/testing';
 import {PortalModule, CdkPortalOutlet, TemplatePortal} from '@angular/cdk/portal';
 import {A11yModule, FocusTrap, CdkTrapFocus} from '../index';
 import {By} from '@angular/platform-browser';
+import {CommonModule} from "@angular/common";
 
 
 describe('FocusTrap', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [A11yModule, PortalModule],
+      imports: [CommonModule, A11yModule, PortalModule],
       declarations: [
         FocusTrapWithBindings,
         SimpleFocusTrap,

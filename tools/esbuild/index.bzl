@@ -53,21 +53,11 @@ def esbuild_amd(name, entry_point, module_name, testonly = False, config = None,
         deps = [config, "%s_deps" % config] if config else None,
     )
 
-    _esbuild(
-        name = "%s_bundle" % name,
+    esbuild(
+        name = name,
         testonly = testonly,
         deps = deps,
-       # minify = True,
-        sourcemap = "inline",
-        platform = "browser",
-        target = "es2015",
         entry_point = entry_point,
         config = "%s_config_lib" % name,
         **kwargs
-    )
-
-    native.filegroup(
-        name = name,
-        testonly = testonly,
-        srcs = ["%s_bundle" % name],
     )

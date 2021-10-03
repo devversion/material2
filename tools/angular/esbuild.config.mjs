@@ -6,9 +6,17 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import linkerPlugin from '@angular/compiler-cli/linker/babel';
+import {NodeJSFileSystem, ConsoleLogger, LogLevel} from '@angular/compiler-cli';
+import {createEs2015LinkerPlugin} from '@angular/compiler-cli/linker/babel';
 import babel from '@babel/core';
 import fs from 'fs';
+
+const linkerBabelPlugin = createEs2015LinkerPlugin({
+  fileSystem: new NodeJSFileSystem(),
+  logger: new ConsoleLogger(LogLevel.warn),
+  // We enable JIT mode as unit tests also will rely on the linked ESM files.
+  linkerJitMode: true,
+});
 
 const linkerEsbuildPlugin = {
   name: 'ng-linker-esbuild',
@@ -19,7 +27,7 @@ const linkerEsbuildPlugin = {
       const {code} = await babel.transformAsync(content,  {
         filename: filePath,
         filenameRelative: filePath,
-        plugins: [linkerPlugin],
+        plugins: [linkerBabelPlugin],
         sourceMaps: 'inline',
       });
       return {contents: code};
