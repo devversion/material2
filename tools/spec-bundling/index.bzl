@@ -9,6 +9,9 @@ load("//tools/angular:index.bzl", "LINKER_PROCESSED_FW_PACKAGES")
 
 def _is_spec_file(file):
     basename = file.basename
+    # External files (from other workspaces) should never run as specs.
+    if (file.short_path.startswith("../")):
+        return False
     # `spec.js` or `spec.mjs` files will be imported in the entry-point.
     return basename.endswith("spec.js") or basename.endswith("spec.mjs")
 
@@ -65,27 +68,36 @@ _spec_entrypoint = rule(
     }
 )
 
-def spec_bundle(name, deps):
+def spec_bundle(name, platform, deps, **kwargs):
+    is_browser_test = platform == "browser"
+    package_name = native.package_name()
+    workspace = "angular_material"
+
     _spec_entrypoint(
         name = "%s_spec_entrypoint" % name,
         deps = deps,
         testonly = True,
     )
 
-    esbuild_amd(
+    # Browser tests (Karma) need named AMD modules to load.
+    esbuild_rule = esbuild_amd if is_browser_test else esbuild
+    amd_name =  "%s/%s/%s" % (workspace, package_name, name + "_spec") if is_browser_test else None
+
+    esbuild_rule(
         name = "%s_bundle" % name,
         testonly = True,
         config = "//tools/spec-bundling:esbuild_config",
         entry_point = ":%s_spec_entrypoint" % name,
-        module_name = "angular_material/%s/%s" % (native.package_name(), name + "_spec"),
+        module_name = amd_name,
         output = "%s_spec.js" % name,
         # We cannot use `ES2017` or higher as that would result in `async/await` not being downleveled.
         # ZoneJS needs to be able to intercept these as otherwise change detection would not work properly.
         target = "es2016",
-        platform = "browser",
+        platform = platform,
          # Note: We add all linker-processed FW packages as dependencies here so that ESBuild will
          # map all framework packages to their linker-processed bundles from `tools/angular`.
         deps = deps + LINKER_PROCESSED_FW_PACKAGES + [":%s_spec_entrypoint" % name],
+        **kwargs
     )
 
     js_library(

@@ -168,10 +168,7 @@ def ng_package(name, data = [], deps = [], externals = PKG_EXTERNALS, readme_md 
         name = name,
         externals = externals,
         data = data + [":license_copied"],
-        # Tslib needs to be explicitly specified as dependency here, so that the `ng_package`
-        # rollup bundling action can include tslib. Tslib is usually a transitive dependency of
-        # entry-points passed to `ng_package`, but the rule does not collect transitive deps.
-        deps = deps + ["@npm//tslib"],
+        deps = deps,
         # We never set a `package_name` for NPM packages, neither do we enable validation.
         # This is necessary because the source targets of the NPM packages all have
         # package names set and setting a similar `package_name` on the NPM package would
@@ -248,14 +245,6 @@ def karma_web_test_suite(name, **kwargs):
     web_test_args = {}
     test_deps = ["//tools/rxjs:rxjs_umd_modules"] + kwargs.get("deps", [])
 
-    # Note: Ideally we would not add all Angular and MDC UMD files to a test because
-    # some might be unused. This would require some custom tooling to resolve the
-    # correct named AMD files from transitive dependencies and is not worth the effort
-    # given the UMD files being small and most of the packages being used anyway.
-    # TODO(devversion): reconsider this if `rules_nodejs` can recognize named AMD files.
-    kwargs["srcs"] = ["@npm//:node_modules/tslib/tslib.js"] + MDC_PACKAGE_UMD_BUNDLES.values() + kwargs.get("srcs", [])
-    #getAngularUmdTargets() + \
-
     kwargs["tags"] = ["partial-compilation-integration"] + kwargs.get("tags", [])
     kwargs["deps"] = select({
         # Based on whether partial compilation is enabled, use the linker processed dependencies.
@@ -266,6 +255,7 @@ def karma_web_test_suite(name, **kwargs):
     spec_bundle(
         name = "%s_bundle" % name,
         deps = test_deps,
+        platform = "browser",
     )
 
     linker_process(
@@ -314,9 +304,18 @@ def karma_web_test_suite(name, **kwargs):
         **kwargs
     )
 
-def protractor_web_test_suite(**kwargs):
+def protractor_web_test_suite(name, deps, **kwargs):
+    spec_bundle(
+        name = "%s_bundle" % name,
+        deps = deps,
+        platform = "node",
+        external = ["protractor", "selenium-webdriver"]
+    )
+
     _protractor_web_test_suite(
+        name = name,
         browsers = ["@npm//@angular/dev-infra-private/bazel/browsers/chromium:chromium"],
+        deps = ["%s_bundle" % name],
         **kwargs
     )
 

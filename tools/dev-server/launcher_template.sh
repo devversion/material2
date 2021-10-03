@@ -26,4 +26,4 @@ devserverBin=$(rlocation "angular_material/tools/dev-server/dev-server_bin.sh")
 
 # Start the devserver with the given arguments. The arguments will be
 # substituted based on the rule attributes.
-${devserverBin} TEMPLATED_args
+${devserverBin} TEMPLATED_args "$@"

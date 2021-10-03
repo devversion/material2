@@ -7,6 +7,8 @@
  */
 
 export default {
+  // `tslib` sets the `module` condition to resolve to ESM.
   conditions: ['module'],
+  // This ensures that we prioritize ES2020. RxJS would otherwise use the ESM5 output.
   mainFields: ['es2020', 'es2015', 'module', 'main'],
 };

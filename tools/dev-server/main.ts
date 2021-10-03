@@ -11,6 +11,8 @@ import * as minimist from 'minimist';
 import {DevServer} from './dev-server';
 import {setupBazelWatcherSupport} from './ibazel';
 
+console.error(process.argv)
+
 const args = process.argv.slice(2);
 const {root_paths: _rootPathsRaw, port, historyApiFallback} =
     minimist(args, {boolean: 'historyApiFallback'});
