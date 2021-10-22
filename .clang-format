@@ -12,3 +12,4 @@ AllowShortLoopsOnASingleLine:               false
 AllowShortFunctionsOnASingleLine:           Empty
 JavaScriptWrapImports:                      true
 
+
