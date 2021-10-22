@@ -15,6 +15,7 @@ build --watchfs
 # Turn off legacy external runfiles
 build --nolegacy_external_runfiles
 run --nolegacy_external_runfiles
+
 test --nolegacy_external_runfiles
 
 # This flag is needed to so that the bazel cache is not invalidated
