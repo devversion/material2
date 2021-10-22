@@ -29,6 +29,7 @@ jobs:
       # to make the GCP credentials available to the shell using the `env` option.
       - name: Building dev-app
         run: |
+          echo "Test: $GOOGLE_APPLICATION_CREDENTIALS"
           bazel build //src/dev-app:web_package --symlink_prefix=dist/
           chmod -r dist/bin/src/dev-app/web_package 644
         env:
