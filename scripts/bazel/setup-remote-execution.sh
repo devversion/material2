@@ -23,4 +23,4 @@ bashEnvFile=${BASH_ENV:-${GITHUB_ENV}}
 echo "export GOOGLE_APPLICATION_CREDENTIALS=${HOME}/.gcp_credentials" >> ${bashEnvFile}
 
 # Update the project Bazel configuration to always use remote execution.
-echo "build --config=remote" >> bazel.rc
+echo "build --config=remote" >> .bazel.rc
