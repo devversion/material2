@@ -48,6 +48,7 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_PREVIEW_SERVICE_TOKEN }}"
           expires: 15d
           projectId: angular-components-test
+          channelId: pr${{ steps.pr_info.outputs.number }}
         env:
           # Ensures the unzipped dev-app web package is deployed.
           # https://firebase.google.com/docs/cli#environment_variables.
