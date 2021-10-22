@@ -26,12 +26,18 @@ jobs:
 
       # Build the web package and update the permission so that the folder is writable.
       # Bazel by default marks all generated files as readonly.
-      - run: bazel build //src/dev-app:web_package --symlink_prefix=dist/
-      - run: chmod -r dist/bin/src/dev-app/web_package 644
+      - name: Building dev-app
+        run: |
+          source $GITHUB_ENV
+          bazel build //src/dev-app:web_package --symlink_prefix=dist/
 
       # Store the pull request number in a file that can be uploaded as
       # workflow artifact. This is needed to read it from the deploy workflow.
-      - run: echo ${{github.event.pull_request.number}} > dist/bin/src/dev-app/web_package/pr_number
+      # Note: We update the permission of the web package directory as Bazel marks it
+      # as readonly, preventing us from including the PR number file in the web package.
+      - run: |
+          chmod -r dist/bin/src/dev-app/web_package 644
+          echo ${{github.event.pull_request.number}} > dist/bin/src/dev-app/web_package/pr_number
 
       # Upload the generated dev-app archive.
       - uses: actions/upload-artifact@v2
