@@ -36,6 +36,7 @@ jobs:
       - run: unzip devapp.zip
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
+        id: deploy
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_PREVIEW_SERVICE_TOKEN }}"
@@ -45,3 +46,8 @@ jobs:
           # Ensures the unzipped dev-app web package is deployed.
           # https://firebase.google.com/docs/cli#environment_variables.
           RESOURCE_DIR: ${{github.workspace}}
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          append: true
+          message: ${{ steps.deploy.outputs.details_url }}

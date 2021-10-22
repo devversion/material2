@@ -24,10 +24,10 @@ jobs:
 
       # Store the pull request number in a file that can be uploaded as
       # workflow artifact. This is needed to read it from the deploy workflow.
-      - run: echo ${{github.event.pull_request.number}} > dist/bin/dev-app/web_package/pr_number
+      - run: echo ${{github.event.pull_request.number}} > dist/bin/src/dev-app/web_package/pr_number
 
       # Upload the generated dev-app archive.
       - uses: actions/upload-artifact@v2
         with:
           name: devapp
-          path: dist/bin/dev-app/web_package
+          path: dist/bin/src/dev-app/web_package
