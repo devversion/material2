@@ -25,13 +25,14 @@ jobs:
           GCP_DECRYPT_TOKEN: angular
 
       # Build the web package and update the permission so that the folder is writable.
-      # Bazel by default marks all generated files as readonly. Note that we also source
-      # the environment file from the Github action so that the RBE variables are available.
+      # Bazel by default marks all generated files as readonly. Note that we also need
+      # to make the GCP credentials available to the shell using the `env` option.
       - name: Building dev-app
         run: |
-          source $GITHUB_ENV
           bazel build //src/dev-app:web_package --symlink_prefix=dist/
           chmod -r dist/bin/src/dev-app/web_package 644
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{env.GOOGLE_APPLICATION_CREDENTIALS}}
 
       # Store the pull request number in a file that can be uploaded as
       # workflow artifact. This is needed to read it from the deploy workflow.
