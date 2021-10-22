@@ -31,7 +31,7 @@ jobs:
         run: |
           source ${GITHUB_ENV}
           bazel build //src/dev-app:web_package --symlink_prefix=dist/
-          chmod -r 644 dist/bin/src/dev-app/web_package
+          chmod 644 dist/bin/src/dev-app/web_package
 
       # Store the pull request number in a file that can be uploaded as
       # workflow artifact. This is needed to read it from the deploy workflow.
