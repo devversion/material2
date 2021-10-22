@@ -10,7 +10,7 @@ if [[ -z "${GCP_DECRYPT_TOKEN}" ]]; then
 fi
 
 # Decode the GCP token that is needed to authenticate the Bazel remote execution.
-openssl aes-256-cbc -d -in .circleci/gcp_token -md md5 -k ${GCP_DECRYPT_TOKEN} \
+openssl aes-256-cbc -d -in scripts/bazel/gcp_token -md md5 -k ${GCP_DECRYPT_TOKEN} \
   -out $HOME/.gcp_credentials
 
 # Export the "GOOGLE_APPLICATION_CREDENTIALS" variable that should refer to the GCP credentials
@@ -18,5 +18,5 @@ openssl aes-256-cbc -d -in .circleci/gcp_token -md md5 -k ${GCP_DECRYPT_TOKEN} \
 # https://github.com/bazelbuild/bazel/blob/master/third_party/grpc/include/grpc/grpc_security.h#L134-L137
 echo "export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.gcp_credentials" >> $BASH_ENV
 
-# Update the CircleCI Bazel configuration to always use remote execution.
-echo "build --config=remote" >> .circleci/bazel.rc
+# Update the project Bazel configuration to always use remote execution.
+echo "build --config=remote" >> bazel.rc

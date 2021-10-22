@@ -20,6 +20,9 @@ jobs:
           restore-keys: v1-${{hashFiles('tools/postinstall/apply-patches.js')}}-
 
       - run: yarn install --frozen-lockfile --non-interactive
+      - run: ./scripts/bazel/setup-remote-execution.sh
+        env:
+          GCP_DECRYPT_TOKEN: angular
       - run: bazel build //src/dev-app:web_package --symlink_prefix=dist/
 
       # Store the pull request number in a file that can be uploaded as
