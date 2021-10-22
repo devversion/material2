@@ -23,7 +23,7 @@ jobs:
             });
 
             const matchArtifact = artifacts.data.artifacts
-              .filter(artifact => artifact.name == "devapp")[0]);
+              .filter(artifact => artifact.name == "devapp")[0];
 
             const download = await github.actions.downloadArtifact({
                owner: context.repo.owner,
