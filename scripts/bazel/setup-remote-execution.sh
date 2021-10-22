@@ -13,10 +13,14 @@ fi
 openssl aes-256-cbc -d -in scripts/bazel/gcp_token -md md5 -k ${GCP_DECRYPT_TOKEN} \
   -out $HOME/.gcp_credentials
 
+# Path to the BASH environment variable. Supports the CircleCI `BASH_ENV` variable,
+# but also the `GITHUB_ENV` variable for Github actions.
+bashEnvFile=${BASH_ENV:-${GITHUB_ENV}}
+
 # Export the "GOOGLE_APPLICATION_CREDENTIALS" variable that should refer to the GCP credentials
 # file. Bazel automatically picks up the credentials from that variable.
 # https://github.com/bazelbuild/bazel/blob/master/third_party/grpc/include/grpc/grpc_security.h#L134-L137
-echo "export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.gcp_credentials" >> $BASH_ENV
+echo "export GOOGLE_APPLICATION_CREDENTIALS=${HOME}/.gcp_credentials" >> ${bashEnvFile}
 
 # Update the project Bazel configuration to always use remote execution.
 echo "build --config=remote" >> bazel.rc
