@@ -33,7 +33,13 @@ jobs:
             });
 
             fs.writeFileSync('${{github.workspace}}/devapp.zip', Buffer.from(download.data));
-      - run: unzip devapp.zip
+
+      - name: Extracting workflow artifact.
+        run: unzip devapp.zip
+
+      - name: Extracting pull request from extracted workflow artifact.
+        run: echo "::set-output name=number::$(cat ./pr_number)"
+        id: pr_info
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         id: deploy
@@ -51,3 +57,4 @@ jobs:
         with:
           append: true
           message: ${{ steps.deploy.outputs.details_url }}
+          number: ${{ steps.pr_info.outputs.number }}

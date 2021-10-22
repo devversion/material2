@@ -23,7 +23,11 @@ jobs:
       - run: ./scripts/bazel/setup-remote-execution.sh
         env:
           GCP_DECRYPT_TOKEN: angular
+
+      # Build the web package and update the permission so that the folder is writable.
+      # Bazel by default marks all generated files as readonly.
       - run: bazel build //src/dev-app:web_package --symlink_prefix=dist/
+      - run: chmod -r dist/bin/src/dev-app/web_package 644
 
       # Store the pull request number in a file that can be uploaded as
       # workflow artifact. This is needed to read it from the deploy workflow.
