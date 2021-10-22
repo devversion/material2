@@ -55,6 +55,6 @@ jobs:
 
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
-          append: true
-          message: ${{ steps.deploy.outputs.details_url }}
+          message: |
+            Deployed dev-app to: ${{ steps.deploy.outputs.details_url }}
           number: ${{ steps.pr_info.outputs.number }}
