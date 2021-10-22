@@ -15,17 +15,17 @@ jobs:
         uses: actions/github-script@v3.1.0
         with:
           script: |
-            var fs = require('fs');
-            var artifacts = await github.actions.listWorkflowRunArtifacts({
+            const fs = require('fs');
+            const artifacts = await github.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,
                run_id: ${{github.event.workflow_run.id }},
             });
 
-            var matchArtifact = artifacts.data.artifacts.filter(artifact =>
-              return artifact.name == "devapp")[0]);
+            const matchArtifact = artifacts.data.artifacts
+              .filter(artifact => artifact.name == "devapp")[0]);
 
-            var download = await github.actions.downloadArtifact({
+            const download = await github.actions.downloadArtifact({
                owner: context.repo.owner,
                repo: context.repo.repo,
                artifact_id: matchArtifact.id,
