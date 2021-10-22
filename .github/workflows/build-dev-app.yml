@@ -1,0 +1,33 @@
+name: Build dev-app
+
+on:
+  pull_request:
+    types: [synchronize, opened]
+
+jobs:
+  dev-app-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Setup cache for node modules.
+      - uses: actions/cache@v2
+        with:
+          path: node_modules/
+          # Cache key. Whenever the postinstall patches change, the cache needs to be invalidated.
+          # If just the `yarn.lock` file changes, the most recent cache can be restored though.
+          # See: https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows#example-using-the-cache-action.
+          key: v1-${{hashFiles('tools/postinstall/apply-patches.js')}}-${{hashFiles('yarn.lock')}}
+          restore-keys: v1-${{hashFiles('tools/postinstall/apply-patches.js')}}-
+
+      - run: yarn install --frozen-lockfile --non-interactive
+      - run: bazel build //src/dev-app:web_package --symlink_prefix=dist/
+
+      # Store the pull request number in a file that can be uploaded as
+      # workflow artifact. This is needed to read it from the deploy workflow.
+      - run: echo ${{github.event.pull_request.number}} > dist/bin/dev-app/web_package/pr_number
+
+      # Upload the generated dev-app archive.
+      - uses: actions/upload-artifact@v2
+        with:
+          name: devapp
+          path: dist/bin/dev-app/web_package

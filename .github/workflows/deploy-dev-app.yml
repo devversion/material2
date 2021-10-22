@@ -1,0 +1,47 @@
+name: Deploying dev-app to firebase previews
+
+on:
+  workflow_run:
+    workflows: [Build dev-app]
+    types: [completed]
+
+jobs:
+  deploy-dev-app:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Download artifact'
+        uses: actions/github-script@v3.1.0
+        with:
+          script: |
+            var fs = require('fs');
+            var artifacts = await github.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: ${{github.event.workflow_run.id }},
+            });
+
+            var matchArtifact = artifacts.data.artifacts.filter(artifact =>
+              return artifact.name == "devapp")[0]);
+
+            var download = await github.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+
+            fs.writeFileSync('${{github.workspace}}/devapp.zip', Buffer.from(download.data));
+      - run: unzip devapp.zip
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_PREVIEW_SERVICE_TOKEN }}"
+          expires: 15d
+          projectId: angular-components-test
+        env:
+          # Ensures the unzipped dev-app web package is deployed.
+          # https://firebase.google.com/docs/cli#environment_variables.
+          RESOURCE_DIR: ${{github.workspace}}
