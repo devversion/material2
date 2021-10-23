@@ -1,61 +1,59 @@
-name: Deploying dev-app to firebase previews
+name: Deploying dev-app to Firebase previews
 
 on:
-  workflow_run:
-    workflows: [Build dev-app]
-    types: [completed]
+  pull_request:
+    types: [labeled, synchronize]
 
 jobs:
   deploy-dev-app:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: contains(github.event.pull_request.labels.*.name, 'dev-app preview')
     steps:
       - uses: actions/checkout@v2
-      - name: 'Download artifact'
-        uses: actions/github-script@v3.1.0
+      - uses: actions/cache@v2
         with:
-          script: |
-            const fs = require('fs');
-            const artifacts = await github.actions.listWorkflowRunArtifacts({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: ${{github.event.workflow_run.id }},
-            });
+          path: |
+            **/node_modules
+          # Cache key. Whenever the postinstall patches change, the cache needs to be invalidated.
+          # If just the `yarn.lock` file changes, the most recent cache can be restored though.
+          # See: https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows#example-using-the-cache-action.
+          key: v2-${{hashFiles('tools/postinstall/apply-patches.js')}}-${{hashFiles('yarn.lock')}}
+          restore-keys: v2-${{hashFiles('tools/postinstall/apply-patches.js')}}-
 
-            const matchArtifact = artifacts.data.artifacts
-              .filter(artifact => artifact.name == "devapp")[0];
+      - run: yarn install --frozen-lockfile --non-interactive
+      - run: ./scripts/bazel/setup-remote-execution.sh
+        env:
+          GCP_DECRYPT_TOKEN: angular
 
-            const download = await github.actions.downloadArtifact({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               artifact_id: matchArtifact.id,
-               archive_format: 'zip',
-            });
+      # Build the web package. Note that we also need to make the Github environment
+      # variables available so that the RBE is configured.
+      - name: Building dev-app
+        run: |
+          source ${GITHUB_ENV}
+          bazel build //src/dev-app:web_package --symlink_prefix=dist/
 
-            fs.writeFileSync('${{github.workspace}}/devapp.zip', Buffer.from(download.data));
-
-      - name: Extracting workflow artifact into Firebase public directory.
+      - name: Copying dev-app into Firebase public directory.
         run: |
           mkdir -p dist/dev-app-web-pkg
-          unzip devapp.zip -d dist/dev-app-web-pkg
+          cp -R dist/bin/src/dev-app/web_package/* dist/dev-app-web-pkg
 
-      - name: Extracting pull request from extracted workflow artifact.
+      - name: Preparing firebase credentials
         run: |
-          echo "::set-output name=number::$(cat ./dist/dev-app-web-pkg/pr_number)"
-          echo "::set-output name=sha::$(cat ./dist/dev-app-web-pkg/pr_sha)"
-        id: pr_info
+          echo "${{secrets.FIREBASE_PREVIEW_SERVICE_TOKEN}}" > $HOME/.gcp_service_key
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/.gcp_service_key" > $GITHUB_ENV
 
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Deploying to Firebase
         id: deploy
-        with:
-          repoToken: "${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "${{ secrets.FIREBASE_PREVIEW_SERVICE_TOKEN }}"
-          expires: 15d
-          projectId: angular-components-test
-          channelId: pr-${{ steps.pr_info.outputs.number }}-${{steps.pr_info.outputs.sha }}
+        run: |
+          source $GITHUB_ENV
+          result=$(node ./scripts/deploy-dev-app.js \
+            --channelId pr-${{ steps.pr_info.outputs.number }}-${{steps.pr_info.outputs.sha }}
+            --project angular-components-test \
+            --json)
+
+          echo "::set-output name=data::$result"
 
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
           message: |
-            Deployed dev-app to: ${{ steps.deploy.outputs.details_url }}
-          number: ${{ steps.pr_info.outputs.number }}
+            Deployed dev-app to: ${{ fromJson(steps.deploy.outputs.data).result[0].url }}
