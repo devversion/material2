@@ -12,12 +12,13 @@ jobs:
       # Setup cache for node modules.
       - uses: actions/cache@v2
         with:
-          path: node_modules/
+          path: |
+            **/node_modules
           # Cache key. Whenever the postinstall patches change, the cache needs to be invalidated.
           # If just the `yarn.lock` file changes, the most recent cache can be restored though.
           # See: https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows#example-using-the-cache-action.
-          key: v1-${{hashFiles('tools/postinstall/apply-patches.js')}}-${{hashFiles('yarn.lock')}}
-          restore-keys: v1-${{hashFiles('tools/postinstall/apply-patches.js')}}-
+          key: v2-${{hashFiles('tools/postinstall/apply-patches.js')}}-${{hashFiles('yarn.lock')}}
+          restore-keys: v2-${{hashFiles('tools/postinstall/apply-patches.js')}}-
 
       - run: yarn install --frozen-lockfile --non-interactive
       - run: ./scripts/bazel/setup-remote-execution.sh
@@ -38,6 +39,7 @@ jobs:
           mkdir -p dist/devapp
           cp -R dist/bin/src/dev-app/web_package/* dist/devapp
           echo ${{github.event.pull_request.number}} > dist/devapp/pr_number
+          echo ${{github.event.pull_request.head.sha}} > dist/devapp/pr_sha
 
       # Upload the generated dev-app archive.
       - uses: actions/upload-artifact@v2

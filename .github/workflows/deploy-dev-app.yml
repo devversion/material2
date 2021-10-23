@@ -40,7 +40,9 @@ jobs:
           unzip devapp.zip -d dist/dev-app-web-pkg
 
       - name: Extracting pull request from extracted workflow artifact.
-        run: echo "::set-output name=number::$(cat ./dist/dev-app-web-pkg/pr_number)"
+        run: |
+          echo "::set-output name=number::$(cat ./dist/dev-app-web-pkg/pr_number)"
+          echo "::set-output name=sha::$(cat ./dist/dev-app-web-pkg/pr_sha)"
         id: pr_info
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
@@ -50,7 +52,7 @@ jobs:
           firebaseServiceAccount: "${{ secrets.FIREBASE_PREVIEW_SERVICE_TOKEN }}"
           expires: 15d
           projectId: angular-components-test
-          channelId: pr${{ steps.pr_info.outputs.number }}
+          channelId: pr-${{ steps.pr_info.outputs.number }}-${{steps.pr_info.outputs.sha }}
 
       - uses: marocchino/sticky-pull-request-comment@v2
         with:
