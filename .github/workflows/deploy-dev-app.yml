@@ -9,7 +9,7 @@ name: Deploying dev-app to firebase previews
 
 on:
   workflow_run:
-    workflows: [Build dev-app]
+    workflows: [Build dev-app for deployment]
     types: [completed]
 
 jobs:
