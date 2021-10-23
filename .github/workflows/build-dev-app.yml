@@ -2,11 +2,12 @@ name: Build dev-app
 
 on:
   pull_request:
-    types: [synchronize, opened]
+    types: [synchronize, labeled]
 
 jobs:
   dev-app-build:
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'dev-app preview')
     steps:
       - uses: actions/checkout@v2
       # Setup cache for node modules.
