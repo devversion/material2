@@ -9,6 +9,7 @@
 # dependencies
 node_modules
 
+
 /bower_components
 
 # Angular CLI project cache
