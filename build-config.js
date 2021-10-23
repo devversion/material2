@@ -6,6 +6,7 @@ const {join} = require('path');
 
 const packageJson = require('./package.json');
 
+
 /** Current version of the project*/
 const buildVersion = packageJson.version;
 
