@@ -14,7 +14,11 @@ on:
 jobs:
   dev-app-build:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'dev-app preview')
+    # We only want to build and deploy the dev-app if the `dev-app preview` label has been
+    # added, or if the label is already applied and new changes have been made in the PR.
+    if: |
+      (github.event.action == 'labeled' && github.event.label.name == 'dev-app preview') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'dev-app preview'))
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
