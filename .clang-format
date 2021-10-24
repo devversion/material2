@@ -4,6 +4,7 @@ ColumnLimit:     100
 
 TabWidth:                2
 ContinuationIndentWidth: 4
+
 MaxEmptyLinesToKeep:     2
 
 AllowShortBlocksOnASingleLine:              false
