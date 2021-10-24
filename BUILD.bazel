@@ -11,6 +11,7 @@ exports_files([
     "package.json",
 ])
 
+
 # Target which writes the list of package externals into a JSON file so that the
 # Starlark-configured externals (for the NPM package bundling) can be passed to
 # the `check-package-externals` Yarn script, which validates our module imports.
