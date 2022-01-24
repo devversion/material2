@@ -1,34 +1,24 @@
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
-load("//tools:integration.bzl", "CLI_PROJECT_MAPPINGS")
-load("//tools:defaults.bzl", "node_integration_test")
+load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
+load("//tools:defaults.bzl", "ts_library")
 
-npmPackageMappings = dicts.add(
-    CLI_PROJECT_MAPPINGS,
-    {
-        "//src/cdk:npm_package_archive": "@angular/cdk",
-        "//src/material:npm_package_archive": "@angular/material",
-        "//src/material-experimental:npm_package_archive": "@angular/material-experimental",
-    },
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["verify-golds.ts"])
+
+ts_library(
+    name = "verify-golds-src",
+    srcs = ["verify-golds.ts"],
+    deps = [
+        "@npm//@bazel/runfiles",
+        "@npm//@types/node",
+    ],
 )
 
-node_integration_test(
-    name = "test",
-    srcs = glob(["**/*"]),
-    commands = [
-        # Note: We use a cache folder within the integration test as otherwise
-        # the NPM package mapped archive would be cached in the system.
-        # See: https://github.com/yarnpkg/yarn/issues/2165.
-        # TODO(devversion): determine if a solution/workaround could live in the test runner.
-        "yarn install --cache-folder .yarn_cache_folder/",
-        "yarn ng generate @angular/material:mdc-migration -c all --tsconfig tsconfig.app.json",
-        "yarn test",
+nodejs_binary(
+    name = "verify-golds",
+    data = [
+        ":verify-golds-src",
     ],
-    npm_packages = npmPackageMappings,
-    tags = [
-        # Chromium cannot run in Sandbox. For this test, sandbox is disabled.
-        # Additionally, we need to disable RBE as this test relies on internet
-        # access for installing the NPM packages.
-        "no-sandbox",
-        "no-remote-exec",
-    ],
+    entry_point = ":verify-golds.ts",
+    templated_args = ["--bazel_patch_module_resolver"],
 )
