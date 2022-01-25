@@ -1,13 +1,20 @@
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@build_bazel_rules_nodejs//:index.bzl", "nodejs_binary")
-load("//tools:defaults.bzl", "ts_library")
+load("//tools:integration.bzl", "CLI_PROJECT_MAPPINGS")
+load("//tools:defaults.bzl", "node_integration_test", "ts_library")
 
-package(default_visibility = ["//visibility:public"])
-
-exports_files(["verify-golds.ts"])
+npmPackageMappings = dicts.add(
+    CLI_PROJECT_MAPPINGS,
+    {
+        "//src/cdk:npm_package_archive": "@angular/cdk",
+        "//src/material:npm_package_archive": "@angular/material",
+        "//src/material-experimental:npm_package_archive": "@angular/material-experimental",
+    },
+)
 
 ts_library(
-    name = "verify-golds-src",
-    srcs = ["verify-golds.ts"],
+    name = "verify_golden_lib",
+    srcs = ["verify-golden.ts"],
     deps = [
         "@npm//@bazel/runfiles",
         "@npm//@types/node",
@@ -15,10 +22,35 @@ ts_library(
 )
 
 nodejs_binary(
-    name = "verify-golds",
-    data = [
-        ":verify-golds-src",
-    ],
-    entry_point = ":verify-golds.ts",
+    name = "verify_golden",
+    data = [":verify_golden_lib"],
+    entry_point = ":verify-golden.ts",
     templated_args = ["--bazel_patch_module_resolver"],
+)
+
+node_integration_test(
+    name = "test",
+    srcs = glob(["golden/**/*", "sample-project/**/*"]),
+    # Sample project becomes the working directory for the integration test, ensuring
+    # that its project `package.json` is substitued with the NPM package mappings etc.
+    working_dir = "sample-project/",
+    commands = [
+        # Note: We use a cache folder within the integration test as otherwise
+        # the NPM package mapped archive would be cached in the system.
+        # See: https://github.com/yarnpkg/yarn/issues/2165.
+        # TODO(devversion): determine if a solution/workaround could live in the test runner.
+        "yarn install --cache-folder .yarn_cache_folder/",
+        "yarn ng generate @angular/material:mdc-migration -c all --tsconfig tsconfig.app.json",
+        "yarn test",
+        "$(rootpath :verify_golden)",
+    ],
+    data = [
+        ":verify_golden",
+    ],
+    npm_packages = npmPackageMappings,
+    setup_chromium = True,
+    tags = [
+        # This test relies on `yarn` so there needs to be internet access.
+        "requires-network",
+    ],
 )
