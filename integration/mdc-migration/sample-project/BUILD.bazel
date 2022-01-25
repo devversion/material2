@@ -28,11 +28,9 @@ node_integration_test(
         "//integration/mdc-migration:verify-golds.ts",
     ],
     npm_packages = npmPackageMappings,
+    setup_chromium = True,
     tags = [
-        # Chromium cannot run in Sandbox. For this test, sandbox is disabled.
-        # Additionally, we need to disable RBE as this test relies on internet
-        # access for installing the NPM packages.
-        "no-sandbox",
-        "no-remote-exec",
+        # This test relies on `yarn` so there needs to be internet access.
+        "requires-network",
     ],
 )
