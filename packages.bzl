@@ -25,7 +25,7 @@ NPM_PACKAGE_SUBSTITUTIONS = {
 NO_STAMP_NPM_PACKAGE_SUBSTITUTIONS = dict(NPM_PACKAGE_SUBSTITUTIONS, **{
     # When building NPM packages for tests (where stamping is disabled),
     # we use `0.0.0` for the version placeholder.
-    "0.0.0-PLACEHOLDER": "0.0.0",
+    "0.0.0-PLACEHOLDER": "10.0.0",
 })
 
 # List of MDC packages.

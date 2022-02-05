@@ -13,7 +13,7 @@ node_integration_test(
         "HOME": "<TMP>",
     },
     npm_packages = {
-        "//src/cdk:npm_package_archive": "@angular/cdk",
+        #   "//src/cdk:npm_package_archive": "@angular/cdk",
         "//src/material:npm_package_archive": "@angular/material",
     },
     tags = [

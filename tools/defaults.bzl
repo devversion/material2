@@ -209,14 +209,10 @@ def ng_package(name, data = [], deps = [], externals = PKG_EXTERNALS, readme_md 
     )
 
     pkg_tar(
-        name = name + "_archive",
+        name = "%s_archive" % name,
         srcs = [":%s" % name],
         extension = "tar.gz",
-        # Note that the use of `strip_prefix` would result in additional directories of the
-        # current Bazel package being included as tar metadata, potentially breaking
-        # extractions with e.g. Yarn Berry/v3. `package_dir` ensures that only contents
-        # of the `<bazel-out>/<current-pkg>/npm_package/` are visible/included.
-        package_dir = "./%s" % name,
+        strip_prefix = "./%s" % name,
         # Target should not build on CI unless it is explicitly requested.
         tags = ["manual"],
         visibility = visibility,
@@ -246,7 +242,7 @@ def pkg_npm(name, visibility = None, **kwargs):
     )
 
     pkg_tar(
-        name = name + "_archive",
+        name = "%s_archive" % name,
         srcs = [":%s" % name],
         extension = "tar.gz",
         strip_prefix = "./%s" % name,
