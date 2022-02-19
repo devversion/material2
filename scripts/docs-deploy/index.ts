@@ -6,6 +6,7 @@ import {buildDocsContentPackage} from '../build-docs-content';
 import {installBuiltPackagesInRepo} from './install-built-packages';
 import * as path from 'path';
 import * as sh from 'shelljs';
+import {deployToSite} from './deploy-to-site';
 
 async function main() {
   sh.set('-e');
@@ -29,6 +30,13 @@ async function main() {
   sh.cd(docsRepoDir);
   sh.exec('yarn install --non-interactive --ignore-scripts');
   sh.exec('yarn prod-build');
+
+  // Deploy to Firebase.
+  deployToSite(docsRepoDir, authToken, {
+    description: 'SHA: TODO',
+    projectId: firebaseProjectId,
+    siteId: targetSiteId,
+  });
 }
 
 main().catch(e => {
