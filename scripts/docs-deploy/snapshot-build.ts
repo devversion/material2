@@ -6,9 +6,9 @@ import {buildDocsContentPackage} from '../build-docs-content';
 import {installBuiltPackagesInRepo} from './install-built-packages';
 import * as path from 'path';
 import * as sh from 'shelljs';
-import {deployToSite} from './deploy-to-site';
+import {DeploymentInfo, deployToSite} from './deploy-to-site';
 
-async function main() {
+export async function buildAndDeployWithSnapshots(firebaseToken: string, target: DeploymentInfo[]) {
   sh.set('-e');
 
   // Clone the docs repo.
@@ -25,23 +25,11 @@ async function main() {
   // the docs repository.
   await installBuiltPackagesInRepo(docsRepoPackageJson, builtPackages);
 
-  // TODO: Update StackBlitz boilerplate to snapshot builds for `next` publishes.
-
+  // Install yarn dependencies and build the production output.
   sh.cd(docsRepoDir);
   sh.exec('yarn install --non-interactive --ignore-scripts');
   sh.exec('yarn prod-build');
 
-  // Deploy to Firebase.
-  deployToSite(docsRepoDir, process.env.TEST_FIREBASE_TOKEN!, {
-    description: 'SHA: TODO',
-    projectId: process.env.TEST_FIREBASE_PROJECT!,
-    siteId: 'next-ng-comp-test', // TODO,
-    /*channelId: 'test-pr',
-    expires: '7d',*/
-  });
+  // Deploy all targets to Firebase.
+  target.forEach(t => deployToSite(docsRepoDir, firebaseToken, t));
 }
-
-main().catch(e => {
-  console.error(e);
-  process.exitCode = 1;
-});
