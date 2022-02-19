@@ -17,7 +17,7 @@
     "postinstall": "node tools/postinstall/apply-patches.js",
     "build": "ts-node --project scripts/tsconfig.json ./scripts/build-packages-dist.ts",
     "build-and-check-release-output": "ts-node --project scripts/tsconfig.json scripts/build-and-check-release-output.ts",
-    "build-docs-content": "node ./scripts/build-docs-content.js",
+    "build-docs-content": "ts-node --project scripts/tsconfig.json ./scripts/build-docs-content.ts",
     "dev-app": "ibazel run //src/dev-app:devserver",
     "test": "node ./scripts/run-component-tests.js",
     "test-local": "yarn -s test --local",
