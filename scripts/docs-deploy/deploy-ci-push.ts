@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-import {getReleaseRepoWithApi} from './github-repo';
-import {siteIds} from './utils';
-import {buildAndDeployWithNpm} from './npm-based-build';
 import {
   fetchActiveReleaseTrains,
   getBranchesForMajorVersions,
   getVersionForVersionBranch,
-  getVersionOfBranch,
   isVersionBranch,
 } from '@angular/dev-infra-private/ng-dev/release/versioning';
+import * as semver from 'semver';
+import {getReleaseRepoWithApi} from './github-versioning';
+import {buildAndDeployWithSnapshots} from './snapshot-build';
+import {getPackageJsonOfProject, projectDir, siteIds} from './utils';
 
 async function main() {
   if (process.env.CIRCLE_PR_NUMBER !== undefined) {
@@ -37,7 +37,7 @@ async function main() {
       targets.push({projectId, description, siteId: siteIds.forTrain(active.next)});
     }
 
-    await buildAndDeployWithNpm(firebaseToken, active.next.version, targets);
+    await buildAndDeployWithSnapshots(firebaseToken, targets);
     return;
   }
 
@@ -53,7 +53,7 @@ async function main() {
       targets.push({projectId, description, siteId: siteIds.rc});
     }
 
-    await buildAndDeployWithNpm(firebaseToken, active.latest.version, targets);
+    await buildAndDeployWithSnapshots(firebaseToken, targets);
     return;
   }
 
@@ -69,7 +69,7 @@ async function main() {
       targets.push({projectId, description, siteId: siteIds.forTrain(active.releaseCandidate)});
     }
 
-    await buildAndDeployWithNpm(firebaseToken, active.latest.version, targets);
+    await buildAndDeployWithSnapshots(firebaseToken, targets);
     return;
   }
 
@@ -80,7 +80,6 @@ async function main() {
     return;
   }
 
-  // Check if the branch is actually the latest
   const branchVersion = getVersionForVersionBranch(branchName)!;
   const branchesForMajor = await getBranchesForMajorVersions(repo, [branchVersion.major]);
 
@@ -95,9 +94,10 @@ async function main() {
     return;
   }
 
-  const version = await getVersionOfBranch(repo, branchName);
+  const {parsed} = await getPackageJsonOfProject(projectDir);
+  const version = semver.parse(parsed.version)!;
 
-  await buildAndDeployWithNpm(firebaseToken, version, [
+  await buildAndDeployWithSnapshots(firebaseToken, [
     {projectId, description, siteId: siteIds.forMajor(version.major)},
   ]);
 }

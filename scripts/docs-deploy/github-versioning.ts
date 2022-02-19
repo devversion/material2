@@ -1,5 +1,4 @@
 import {
-  fetchActiveReleaseTrains,
   getNextBranchName,
   ReleaseRepoWithApi,
 } from '@angular/dev-infra-private/ng-dev/release/versioning';

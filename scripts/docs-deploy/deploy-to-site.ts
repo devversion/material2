@@ -27,9 +27,12 @@ export type DeploymentInfo = ProductionDeployment | PreviewDeployment;
  * or a preview temporary deployment that will expire automatically.
  */
 export function deployToSite(projectPath: string, token: string, info: DeploymentInfo) {
+  // Note: Running yarn in silent move to avoid printing of tokens.
   const firebase = (cmd: string) =>
-    // Note: Running yarn in silent move to avoid printing of tokens.
-    sh.exec(`yarn -s firebase --non-interactive --token "${token}" ${cmd}`, {cwd: projectPath});
+    sh.exec(`yarn -s firebase --non-interactive --token "${token}" ${cmd}`, {
+      fatal: true,
+      cwd: projectPath,
+    });
 
   firebase(`use ${info.projectId}`);
   firebase(`target:clear hosting mat-aio`);

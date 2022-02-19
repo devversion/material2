@@ -1,13 +1,10 @@
 import {BuiltPackage} from '@angular/dev-infra-private/ng-dev/release/config';
 import * as fs from 'fs';
 import * as url from 'url';
+import {getPackageJsonOfProject} from './utils';
 
-export async function installBuiltPackagesInRepo(
-  packageJsonPath: string,
-  builtPackages: BuiltPackage[],
-) {
-  const packageJsonContent = await fs.promises.readFile(packageJsonPath, 'utf8');
-  const packageJson = JSON.parse(packageJsonContent);
+export async function installBuiltPackagesInRepo(repoPath: string, builtPackages: BuiltPackage[]) {
+  const {parsed: packageJson, path: packageJsonPath} = await getPackageJsonOfProject(repoPath);
 
   // We will use Yarn resolutions to install the built packages.
   if (packageJson.resolutions === undefined) {

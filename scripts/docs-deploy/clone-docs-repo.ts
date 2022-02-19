@@ -22,10 +22,10 @@ export function cloneDocsRepositoryForMajor(major: number): string {
   // Clone the docs app (either the main branch, or a dedicated major branch if available).
   if (hasUpstreamDocsBranch(majorDocsBranchName)) {
     console.log(`Cloning docs app with dedicated branch: ${majorDocsBranchName}`);
-    sh.exec(`git clone ${baseCloneArgs} --branch=${majorDocsBranchName}`);
+    sh.exec(`git clone ${baseCloneArgs} --branch=${majorDocsBranchName}`, {fatal: true});
   } else {
     console.log(`Cloning docs app with default branch (no dedicated branch for major).`);
-    sh.exec(`git clone ${baseCloneArgs}`);
+    sh.exec(`git clone ${baseCloneArgs}`, {fatal: true});
   }
 
   return repoTmpDir;
@@ -37,6 +37,7 @@ export function cloneDocsRepositoryForMajor(major: number): string {
 function hasUpstreamDocsBranch(branchName: string): boolean {
   const proc = sh.exec(`git ls-remote ${docsRepoUrl} refs/heads/${branchName}`, {
     silent: true,
+    fatal: true,
   });
 
   return proc.stdout.trim() !== '';
