@@ -36,7 +36,6 @@ export function cloneDocsRepositoryForMajor(major: number): string {
  */
 function hasUpstreamDocsBranch(branchName: string): boolean {
   const proc = sh.exec(`git ls-remote ${docsRepoUrl} refs/heads/${branchName}`, {
-    fatal: true,
     silent: true,
   });
 
