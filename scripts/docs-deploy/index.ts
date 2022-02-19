@@ -32,10 +32,12 @@ async function main() {
   sh.exec('yarn prod-build');
 
   // Deploy to Firebase.
-  deployToSite(docsRepoDir, authToken, {
+  deployToSite(docsRepoDir, process.env.TEST_FIREBASE_TOKEN!, {
     description: 'SHA: TODO',
-    projectId: firebaseProjectId,
-    siteId: targetSiteId,
+    projectId: process.env.TEST_FIREBASE_PROJECT!,
+    siteId: 'next-ng-comp-test', // TODO,
+    /*channelId: 'test-pr',
+    expires: '7d',*/
   });
 }
 

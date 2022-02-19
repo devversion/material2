@@ -53,5 +53,6 @@ function hasUpstreamDocsBranch(branchName: string): boolean {
  * https://docs.google.com/document/d/1xkrSOFa6WeFqyg1cTwMhl_wB8ygbVwdSxr3K2-cps14/edit#heading=h.nsf3ag63jpwu.
  */
 function getDocsBranchNameForMajor(major: number): string {
-  return `${major}.x`;
+  return `firebase-target`;
+  // TODO return `${major}.x`;
 }
