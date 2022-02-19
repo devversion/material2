@@ -16,6 +16,12 @@ export const siteIds = {
   forTrain: (train: ReleaseTrain) => siteIds.forMajor(train.version.major),
 };
 
+/** Configuration describing the Firebase project that we deploy to. */
+export const firebaseConfig = {
+  projectId: process.env.DOCS_SITE_FIREBASE_PROJECT_ID! ?? 'angular-components-test',
+  token: process.env.DOCS_SITE_FIREBASE_TOKEN!,
+};
+
 /** Finds and parsed the `package.json` of the specified project directory. */
 export async function getPackageJsonOfProject(
   projectPath: string,

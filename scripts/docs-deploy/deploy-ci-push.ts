@@ -9,7 +9,7 @@ import {
 import * as semver from 'semver';
 import {getReleaseRepoWithApi} from './github-versioning';
 import {buildAndDeployWithSnapshots} from './snapshot-build';
-import {getPackageJsonOfProject, projectDir, siteIds} from './utils';
+import {firebaseConfig, getPackageJsonOfProject, projectDir, siteIds} from './utils';
 
 async function main() {
   if (process.env.CIRCLE_PR_NUMBER !== undefined) {
@@ -22,11 +22,10 @@ async function main() {
     throw new Error('Deployment script is unable to determine CI branch.');
   }
 
-  const firebaseToken = process.env.TEST_FIREBASE_TOKEN!;
   const repo = getReleaseRepoWithApi();
   const active = await fetchActiveReleaseTrains(repo);
   const description = `${branchName} - ${process.env.CIRCLE_SHA1!}`;
-  const projectId = process.env.TEST_FIREBASE_PROJECT!;
+  const {projectId, token: authToken} = firebaseConfig;
 
   if (branchName === active.next.branchName) {
     const targets = [{projectId, description, siteId: siteIds.next}];
@@ -37,7 +36,7 @@ async function main() {
       targets.push({projectId, description, siteId: siteIds.forTrain(active.next)});
     }
 
-    await buildAndDeployWithSnapshots(firebaseToken, targets);
+    await buildAndDeployWithSnapshots(authToken, targets);
     return;
   }
 
@@ -53,7 +52,7 @@ async function main() {
       targets.push({projectId, description, siteId: siteIds.rc});
     }
 
-    await buildAndDeployWithSnapshots(firebaseToken, targets);
+    await buildAndDeployWithSnapshots(authToken, targets);
     return;
   }
 
@@ -69,7 +68,7 @@ async function main() {
       targets.push({projectId, description, siteId: siteIds.forTrain(active.releaseCandidate)});
     }
 
-    await buildAndDeployWithSnapshots(firebaseToken, targets);
+    await buildAndDeployWithSnapshots(authToken, targets);
     return;
   }
 
@@ -97,7 +96,7 @@ async function main() {
   const {parsed} = await getPackageJsonOfProject(projectDir);
   const version = semver.parse(parsed.version)!;
 
-  await buildAndDeployWithSnapshots(firebaseToken, [
+  await buildAndDeployWithSnapshots(authToken, [
     {projectId, description, siteId: siteIds.forMajor(version.major)},
   ]);
 }
