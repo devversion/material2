@@ -18,7 +18,7 @@ export const siteIds = {
 
 /** Configuration describing the Firebase project that we deploy to. */
 export const firebaseConfig = {
-  projectId: process.env.DOCS_SITE_FIREBASE_PROJECT_ID! ?? 'angular-components-test',
+  projectId: process.env.DOCS_SITE_FIREBASE_PROJECT_ID ?? 'angular-components-test',
   token: process.env.DOCS_SITE_FIREBASE_TOKEN!,
 };
 
