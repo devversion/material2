@@ -628,9 +628,9 @@ workflows:
       - deploy_docs_site:
           filters: *publish_branches_filter
           requires:
-            - lint
-            - build_release_packages
-            - tests_local_browsers
+          #x  - lint
+          #  - build_release_packages
+          #  - tests_local_browsers
 
   # Snapshot tests workflow that is scheduled to run all specified jobs every hour.
   # This workflow runs various jobs against the Angular snapshot builds from Github.
