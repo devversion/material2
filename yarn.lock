@@ -229,10 +229,9 @@
   dependencies:
     tslib "^2.3.0"
 
-"@angular/bazel@14.0.0-next.16":
-  version "14.0.0-next.16"
-  resolved "https://registry.yarnpkg.com/@angular/bazel/-/bazel-14.0.0-next.16.tgz#f7ffb8def5202882e6f38d8876c0edf5d9275b9e"
-  integrity sha512-rQa1lCsvbEpTMglqDCRpGSNOcfrivrkqODxtSJvn6r6vCB3mDlc1cgILEUmiJ5giHEfvKfEAmJi2D/2UX7y+vA==
+"@angular/bazel@https://github.com/angular/bazel-builds.git#fd97080db7fe0feb7f20016ec2604cff7e4e3366":
+  version "14.1.0-next.0"
+  resolved "https://github.com/angular/bazel-builds.git#fd97080db7fe0feb7f20016ec2604cff7e4e3366"
   dependencies:
     "@microsoft/api-extractor" "7.22.2"
     shelljs "^0.8.5"
@@ -329,7 +328,6 @@
 
 "@angular/dev-infra-private@https://github.com/angular/dev-infra-private-builds.git#7d272df6d30e72427057a3a768cc1616fa1e2e1d":
   version "0.0.0-01bb903d5186d054d73dd0676fa1292f80e92c9e"
-  uid "7d272df6d30e72427057a3a768cc1616fa1e2e1d"
   resolved "https://github.com/angular/dev-infra-private-builds.git#7d272df6d30e72427057a3a768cc1616fa1e2e1d"
   dependencies:
     "@angular-devkit/build-angular" "14.0.0-next.12"
